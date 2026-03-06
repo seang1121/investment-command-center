@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CompoundGrowthCalculator from "@/components/calculators/compound-growth-calculator";
 
 export default function LaterPage() {
   return (
@@ -12,6 +13,8 @@ export default function LaterPage() {
       </p>
 
       <div className="space-y-6">
+        <CompoundGrowthCalculator />
+
         <section className="rounded-xl border border-violet-500/30 bg-violet-500/5 p-6">
           <h2 className="text-xl font-semibold text-violet-400">
             Core Principles

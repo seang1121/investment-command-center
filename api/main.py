@@ -8,9 +8,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routers import (
+    cashflow,
     data,
     dividends,
+    health,
     monte_carlo,
+    networth,
     optimization,
     portfolio,
     risk_metrics,
@@ -35,6 +38,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "http://localhost:3100",
+        "http://127.0.0.1:3100",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -42,17 +47,20 @@ app.add_middleware(
 )
 
 # Mount routers
+app.include_router(cashflow.router)
 app.include_router(data.router)
 app.include_router(risk_metrics.router)
 app.include_router(monte_carlo.router)
 app.include_router(optimization.router)
 app.include_router(dividends.router)
+app.include_router(health.router)
+app.include_router(networth.router)
 app.include_router(portfolio.router)
 app.include_router(screener.router)
 
 
 @app.get("/api/health")
-def health() -> dict:
+def api_health() -> dict:
     return {"status": "ok", "version": "2.0.0"}
 
 

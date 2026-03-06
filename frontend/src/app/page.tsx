@@ -1,56 +1,58 @@
-import Link from "next/link";
+"use client";
 
-const TOOLS = [
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { formatCurrency } from "@/lib/utils";
+import GuidedWizard from "@/components/wizard/guided-wizard";
+
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+const card = "rounded-xl border border-gray-800 bg-gray-900/50 p-6";
+
+const MONEY_LINKS = [
   {
-    href: "/tools/risk-metrics",
-    title: "Risk Metrics",
-    desc: "Sharpe, Sortino, VaR, max drawdown, beta",
+    href: "/cash-flow",
+    label: "Cash Flow",
+    desc: "Income, expenses, surplus tracking",
     color: "emerald",
   },
   {
-    href: "/tools/monte-carlo",
-    title: "Monte Carlo",
-    desc: "10,000 scenario simulation with probability bands",
+    href: "/net-worth",
+    label: "Net Worth",
+    desc: "Assets, liabilities, snapshots",
     color: "blue",
   },
   {
-    href: "/tools/efficient-frontier",
-    title: "Efficient Frontier",
-    desc: "Optimize portfolio weights for max Sharpe ratio",
-    color: "violet",
-  },
-  {
-    href: "/tools/dividends",
-    title: "Dividend Analysis",
-    desc: "DDM valuation, payout ratio, growth rates, calendar",
-    color: "amber",
-  },
-  {
-    href: "/tools/screener",
-    title: "Scanner & Screener",
-    desc: "AI-powered stock scanner with buy/hold/sell signals",
-    color: "rose",
-  },
-  {
     href: "/portfolio",
-    title: "My Portfolio",
-    desc: "Upload holdings, track P&L, dividend calendar",
+    label: "Portfolio",
+    desc: "Holdings, P&L, dividend calendar",
     color: "cyan",
   },
 ];
 
-const colorClasses: Record<string, string> = {
-  emerald:
-    "border-emerald-500/30 hover:border-emerald-500/60 hover:bg-emerald-500/5",
-  blue: "border-blue-500/30 hover:border-blue-500/60 hover:bg-blue-500/5",
-  violet:
-    "border-violet-500/30 hover:border-violet-500/60 hover:bg-violet-500/5",
-  amber: "border-amber-500/30 hover:border-amber-500/60 hover:bg-amber-500/5",
-  rose: "border-rose-500/30 hover:border-rose-500/60 hover:bg-rose-500/5",
-  cyan: "border-cyan-500/30 hover:border-cyan-500/60 hover:bg-cyan-500/5",
+const TOOL_LINKS = [
+  { href: "/tools/risk-metrics", label: "Risk Metrics", color: "emerald" },
+  { href: "/tools/monte-carlo", label: "Monte Carlo", color: "blue" },
+  {
+    href: "/tools/efficient-frontier",
+    label: "Efficient Frontier",
+    color: "violet",
+  },
+  { href: "/tools/dividends", label: "Dividends", color: "amber" },
+  { href: "/tools/screener", label: "Screener", color: "rose" },
+  { href: "/tools/compare", label: "Compare", color: "cyan" },
+];
+
+const colorBorder: Record<string, string> = {
+  emerald: "border-emerald-500/30 hover:border-emerald-500/60",
+  blue: "border-blue-500/30 hover:border-blue-500/60",
+  violet: "border-violet-500/30 hover:border-violet-500/60",
+  amber: "border-amber-500/30 hover:border-amber-500/60",
+  rose: "border-rose-500/30 hover:border-rose-500/60",
+  cyan: "border-cyan-500/30 hover:border-cyan-500/60",
 };
 
-const titleColors: Record<string, string> = {
+const colorText: Record<string, string> = {
   emerald: "text-emerald-400",
   blue: "text-blue-400",
   violet: "text-violet-400",
@@ -59,38 +61,164 @@ const titleColors: Record<string, string> = {
   cyan: "text-cyan-400",
 };
 
+interface QuickStats {
+  netWorth: number | null;
+  surplus: number | null;
+  portfolioValue: number | null;
+  savingsRate: number | null;
+}
+
 export default function Home() {
+  const [stats, setStats] = useState<QuickStats>({
+    netWorth: null,
+    surplus: null,
+    portfolioValue: null,
+    savingsRate: null,
+  });
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    async function load() {
+      const s: QuickStats = {
+        netWorth: null,
+        surplus: null,
+        portfolioValue: null,
+        savingsRate: null,
+      };
+
+      const [nwRes, cfRes, pRes] = await Promise.all([
+        fetch(`${API}/api/net-worth/summary`).catch(() => null),
+        fetch(`${API}/api/cashflow/summary`).catch(() => null),
+        fetch(`${API}/api/portfolio`).catch(() => null),
+      ]);
+
+      if (nwRes?.ok) {
+        const nw = await nwRes.json();
+        if (nw.total_assets > 0 || nw.total_liabilities > 0) {
+          s.netWorth = nw.net_worth;
+        }
+      }
+      if (cfRes?.ok) {
+        const cf = await cfRes.json();
+        if (cf.total_income > 0) {
+          s.surplus = (cf.total_income ?? 0) - (cf.total_expenses ?? 0);
+          const income = cf.total_income ?? 0;
+          if (income > 0 && s.surplus !== null) {
+            s.savingsRate = (s.surplus / income) * 100;
+          }
+        }
+      }
+      if (pRes?.ok) {
+        const p = await pRes.json();
+        if (p.total_value > 0) {
+          s.portfolioValue = p.total_value;
+        }
+      }
+
+      setStats(s);
+      setLoaded(true);
+    }
+
+    load();
+  }, []);
+
   return (
-    <div>
-      <section className="mb-12 text-center">
+    <div className="space-y-10">
+      {/* Hero */}
+      <section className="text-center">
         <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-          Investment Command Center
+          Your Financial Command Center
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-gray-400">
-          Professional-grade analysis tools for ETFs, mutual funds, and dividend
-          stocks. Monte Carlo simulations, portfolio optimization, risk metrics,
-          and AI-powered scanning.
+        <p className="mx-auto mt-3 max-w-xl text-gray-400">
+          Track cash flow, net worth, and portfolio performance in one place.
         </p>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {TOOLS.map((tool) => (
-          <Link
-            key={tool.href}
-            href={tool.href}
-            className={`group rounded-xl border p-6 transition-all ${colorClasses[tool.color]}`}
-          >
-            <h3 className={`text-lg font-semibold ${titleColors[tool.color]}`}>
-              {tool.title}
-            </h3>
-            <p className="mt-2 text-sm text-gray-500 group-hover:text-gray-400">
-              {tool.desc}
-            </p>
-          </Link>
-        ))}
+      {/* Guided Wizard */}
+      <section>
+        <GuidedWizard />
       </section>
 
-      <section className="mt-12">
+      {/* Row 1: Quick stats */}
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="Net Worth"
+          value={stats.netWorth}
+          href="/net-worth"
+          loaded={loaded}
+          color="emerald"
+        />
+        <StatCard
+          label="Monthly Surplus"
+          value={stats.surplus}
+          href="/cash-flow"
+          loaded={loaded}
+          color="blue"
+        />
+        <StatCard
+          label="Portfolio Value"
+          value={stats.portfolioValue}
+          href="/portfolio"
+          loaded={loaded}
+          color="cyan"
+        />
+        <StatCard
+          label="Savings Rate"
+          value={stats.savingsRate}
+          href="/cash-flow"
+          loaded={loaded}
+          color="violet"
+          suffix="%"
+        />
+      </section>
+
+      {/* Row 2: Two columns */}
+      <section className="grid gap-6 lg:grid-cols-2">
+        {/* Your Money */}
+        <div className={card}>
+          <h2 className="mb-4 text-lg font-semibold text-white">
+            Your Money
+          </h2>
+          <div className="space-y-2">
+            {MONEY_LINKS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center justify-between rounded-lg border p-4 transition-all hover:bg-gray-800/50 ${colorBorder[item.color]}`}
+              >
+                <div>
+                  <p className={`font-medium ${colorText[item.color]}`}>
+                    {item.label}
+                  </p>
+                  <p className="text-sm text-gray-500">{item.desc}</p>
+                </div>
+                <span className="text-gray-600">&rarr;</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Analysis Tools */}
+        <div className={card}>
+          <h2 className="mb-4 text-lg font-semibold text-white">
+            Analysis Tools
+          </h2>
+          <div className="grid grid-cols-2 gap-2">
+            {TOOL_LINKS.map((tool) => (
+              <Link
+                key={tool.href}
+                href={tool.href}
+                className={`rounded-lg border p-3 text-center text-sm font-medium transition-all hover:bg-gray-800/50 ${colorBorder[tool.color]} ${colorText[tool.color]}`}
+              >
+                {tool.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Row 3: Investment Roadmap */}
+      <section>
         <h2 className="mb-4 text-xl font-semibold text-white">
           Investment Roadmap
         </h2>
@@ -133,5 +261,46 @@ export default function Home() {
         </div>
       </section>
     </div>
+  );
+}
+
+/* ---- Sub-component ---- */
+
+function StatCard({
+  label,
+  value,
+  href,
+  loaded,
+  color,
+  suffix,
+}: {
+  label: string;
+  value: number | null;
+  href: string;
+  loaded: boolean;
+  color: string;
+  suffix?: string;
+}) {
+  const border = colorBorder[color] ?? "";
+  const text = colorText[color] ?? "text-white";
+
+  return (
+    <Link
+      href={href}
+      className={`rounded-xl border bg-gray-900/50 p-5 transition-all hover:bg-gray-800/50 ${border}`}
+    >
+      <p className="text-sm text-gray-400">{label}</p>
+      {!loaded ? (
+        <div className="mt-2 h-7 w-24 animate-pulse rounded bg-gray-800" />
+      ) : value !== null ? (
+        <p className={`mt-1 text-2xl font-bold ${text}`}>
+          {suffix === "%"
+            ? `${value.toFixed(1)}%`
+            : formatCurrency(value)}
+        </p>
+      ) : (
+        <p className="mt-1 text-sm text-gray-500">Set up &rarr;</p>
+      )}
+    </Link>
   );
 }

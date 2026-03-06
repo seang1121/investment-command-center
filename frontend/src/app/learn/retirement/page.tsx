@@ -1,4 +1,5 @@
 import Link from "next/link";
+import RetirementCalculator from "@/components/calculators/retirement-calculator";
 
 export default function RetirementPage() {
   return (
@@ -12,6 +13,8 @@ export default function RetirementPage() {
       </p>
 
       <div className="space-y-6">
+        <RetirementCalculator />
+
         <section className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-6">
           <h2 className="text-xl font-semibold text-amber-400">
             Tax-Advantaged Accounts

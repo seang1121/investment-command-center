@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { formatCurrency, formatCompact, formatPct, gainBg } from "@/lib/utils";
 import RecommendationPanel from "@/components/ui/recommendation-panel";
 import { generateScreenerRecommendations } from "@/lib/recommendation-engine";
@@ -26,7 +27,7 @@ type ScanResult = {
   profit_margin?: number | null;
 };
 
-type ScanType = "dividends" | "tech";
+type ScanType = "dividends" | "tech" | "mutual-funds" | "hysa" | "hidden-gems";
 
 const signalColors: Record<string, string> = {
   "Strong Buy": "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
@@ -35,20 +36,42 @@ const signalColors: Record<string, string> = {
   Watch: "bg-gray-500/20 text-gray-400 border-gray-500/40",
 };
 
+const VALID_SCAN_TYPES: ScanType[] = ["dividends", "tech", "mutual-funds", "hysa", "hidden-gems"];
+
 export default function ScreenerPage() {
+  return (
+    <Suspense>
+      <ScreenerContent />
+    </Suspense>
+  );
+}
+
+function ScreenerContent() {
+  const searchParams = useSearchParams();
   const [scanType, setScanType] = useState<ScanType>("dividends");
   const [results, setResults] = useState<ScanResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const t = searchParams.get("type");
+    if (t && VALID_SCAN_TYPES.includes(t as ScanType)) {
+      setScanType(t as ScanType);
+    }
+  }, [searchParams]);
+
   async function runScan() {
     setLoading(true);
     setError(null);
     try {
-      const endpoint =
-        scanType === "dividends"
-          ? "/api/scanner/dividends"
-          : "/api/scanner/tech";
+      const endpointMap: Record<ScanType, string> = {
+        dividends: "/api/scanner/dividends",
+        tech: "/api/scanner/tech",
+        "mutual-funds": "/api/scanner/mutual-funds",
+        hysa: "/api/scanner/hysa",
+        "hidden-gems": "/api/scanner/hidden-gems",
+      };
+      const endpoint = endpointMap[scanType];
 
       const res = await fetch(`${API_BASE}${endpoint}`);
       if (!res.ok) throw new Error("Scan failed");
@@ -85,6 +108,24 @@ export default function ScreenerPage() {
             label: "Emerging Tech",
             desc: "AI, data centers, semiconductors, innovation",
             color: "violet",
+          },
+          {
+            id: "mutual-funds" as const,
+            label: "Mutual Funds",
+            desc: "Top index and actively managed funds",
+            color: "blue",
+          },
+          {
+            id: "hysa" as const,
+            label: "Cash & Savings",
+            desc: "HYSA alternatives \u2014 T-bill & money market ETFs",
+            color: "emerald",
+          },
+          {
+            id: "hidden-gems" as const,
+            label: "Hidden Gems",
+            desc: "Undervalued small/mid-cap stocks with dividends",
+            color: "rose",
           },
         ].map((scan) => (
           <button

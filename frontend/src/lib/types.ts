@@ -134,3 +134,97 @@ export interface PortfolioSummary {
   total_gain_pct: number;
   allocation: Array<{ ticker: string; pct: number }>;
 }
+
+/* ── Cash Flow ────────────────────────────────────── */
+
+export interface Transaction {
+  id: number;
+  date: string;
+  description: string;
+  amount: number;
+  category: string;
+  type: "income" | "expense";
+}
+
+export interface IncomeSource {
+  id: number;
+  name: string;
+  amount: number;
+  frequency: "weekly" | "biweekly" | "monthly" | "annual";
+  created_at: string;
+}
+
+export interface Bill {
+  id: number;
+  name: string;
+  amount: number;
+  due_day: number;
+  category: string;
+  is_auto_pay: boolean;
+  created_at: string;
+}
+
+export interface CashFlowSummary {
+  monthly_income: number;
+  monthly_expenses: number;
+  surplus: number;
+  savings_rate: number;
+  spending_by_category: Record<string, number>;
+  top_expenses: Array<{ description: string; amount: number; category: string }>;
+  bills_total: number;
+  discretionary_spending: number;
+}
+
+/* ── Net Worth ────────────────────────────────────── */
+
+export interface Asset {
+  id: number;
+  name: string;
+  value: number;
+  category: string;
+  updated_at: string;
+}
+
+export interface Liability {
+  id: number;
+  name: string;
+  balance: number;
+  category: string;
+  interest_rate: number | null;
+  min_payment: number | null;
+  updated_at: string;
+}
+
+export interface NetWorthSummary {
+  total_assets: number;
+  total_liabilities: number;
+  net_worth: number;
+  assets_by_category: Record<string, number>;
+  liabilities_by_category: Record<string, number>;
+  assets: Asset[];
+  liabilities: Liability[];
+}
+
+export interface NetWorthSnapshot {
+  id: number;
+  total_assets: number;
+  total_liabilities: number;
+  net_worth: number;
+  snapshot_at: string;
+}
+
+/* ── Portfolio Health ─────────────────────────────── */
+
+export interface HealthCheck {
+  name: string;
+  status: "good" | "warning" | "critical";
+  message: string;
+  detail?: string;
+}
+
+export interface PortfolioHealthResponse {
+  score: number;
+  status: "excellent" | "good" | "fair" | "needs_attention";
+  checks: HealthCheck[];
+  recommendations: string[];
+}

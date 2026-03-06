@@ -2,6 +2,11 @@
 
 from fastapi import APIRouter, HTTPException, Query
 
+from api.services.scanner_extras import (
+    scan_hysa_alternatives,
+    scan_mutual_funds,
+)
+from api.services.scanner_hidden_gems import scan_hidden_gems
 from api.services.screener_service import (
     scan_dividend_stalwarts,
     scan_emerging_tech,
@@ -25,6 +30,33 @@ def tech_scanner(limit: int = Query(20, ge=1, le=50)) -> list:
     """Scan emerging tech/innovation stocks with recommendations."""
     try:
         return scan_emerging_tech(limit=limit)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Scan failed: {e}")
+
+
+@router.get("/scanner/mutual-funds")
+def mutual_fund_scanner(limit: int = Query(20, ge=1, le=50)) -> list:
+    """Scan top mutual funds with expense ratio and performance scoring."""
+    try:
+        return scan_mutual_funds(limit=limit)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Scan failed: {e}")
+
+
+@router.get("/scanner/hysa")
+def hysa_scanner(limit: int = Query(20, ge=1, le=50)) -> list:
+    """Scan T-bill and money market ETFs as HYSA alternatives."""
+    try:
+        return scan_hysa_alternatives(limit=limit)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Scan failed: {e}")
+
+
+@router.get("/scanner/hidden-gems")
+def hidden_gems_scanner(limit: int = Query(20, ge=1, le=50)) -> list:
+    """Scan undervalued small/mid-cap stocks with dividends."""
+    try:
+        return scan_hidden_gems(limit=limit)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Scan failed: {e}")
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { getRiskMetrics } from "@/lib/api-client";
 import { useApi } from "@/hooks/use-api";
 import TickerInput from "@/components/ui/ticker-input";
@@ -11,7 +12,21 @@ import type { RiskMetricsResponse } from "@/lib/types";
 import { formatPct } from "@/lib/utils";
 
 export default function RiskMetricsPage() {
+  return (
+    <Suspense>
+      <RiskMetricsContent />
+    </Suspense>
+  );
+}
+
+function RiskMetricsContent() {
+  const searchParams = useSearchParams();
   const [tickers, setTickers] = useState<string[]>([]);
+
+  useEffect(() => {
+    const t = searchParams.get("tickers");
+    if (t) setTickers(t.split(",").filter(Boolean));
+  }, [searchParams]);
   const { data, loading, error, execute } = useApi(getRiskMetrics);
 
   async function handleAnalyze() {

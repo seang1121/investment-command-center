@@ -1,3 +1,5 @@
+import EmergencyFundCalculator from "@/components/calculators/emergency-fund-calculator";
+
 export default function NowPage() {
   return (
     <div>
@@ -7,6 +9,8 @@ export default function NowPage() {
       </p>
 
       <div className="space-y-6">
+        <EmergencyFundCalculator />
+
         <section className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-6">
           <h2 className="text-xl font-semibold text-emerald-400">
             Emergency Fund

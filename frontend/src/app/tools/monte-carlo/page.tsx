@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { runMonteCarlo } from "@/lib/api-client";
 import { useApi } from "@/hooks/use-api";
 import TickerInput from "@/components/ui/ticker-input";
@@ -13,12 +14,36 @@ import type { MonteCarloRequest } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 
 export default function MonteCarloPage() {
+  return (
+    <Suspense>
+      <MonteCarloContent />
+    </Suspense>
+  );
+}
+
+function MonteCarloContent() {
+  const searchParams = useSearchParams();
   const [tickers, setTickers] = useState<string[]>([]);
   const [initial, setInitial] = useState(10000);
   const [years, setYears] = useState(5);
   const [monthly, setMonthly] = useState(500);
   const [withdrawal, setWithdrawal] = useState(0);
   const [target, setTarget] = useState<number | "">("");
+
+  useEffect(() => {
+    const t = searchParams.get("tickers");
+    if (t) setTickers(t.split(",").filter(Boolean));
+    const i = searchParams.get("initial");
+    if (i) setInitial(Number(i));
+    const y = searchParams.get("years");
+    if (y) setYears(Number(y));
+    const m = searchParams.get("monthly");
+    if (m) setMonthly(Number(m));
+    const w = searchParams.get("withdrawal");
+    if (w) setWithdrawal(Number(w));
+    const tgt = searchParams.get("target");
+    if (tgt) setTarget(Number(tgt));
+  }, [searchParams]);
 
   const { data, loading, error, execute } = useApi(runMonteCarlo);
 

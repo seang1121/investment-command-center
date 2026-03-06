@@ -70,6 +70,63 @@ class Database:
                 notes TEXT,
                 added_at REAL NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS assets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                value REAL NOT NULL,
+                category TEXT NOT NULL DEFAULT 'Other',
+                created_at REAL NOT NULL,
+                updated_at REAL NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS liabilities (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                balance REAL NOT NULL,
+                category TEXT NOT NULL DEFAULT 'Other',
+                interest_rate REAL NOT NULL DEFAULT 0,
+                min_payment REAL NOT NULL DEFAULT 0,
+                created_at REAL NOT NULL,
+                updated_at REAL NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS net_worth_snapshots (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                total_assets REAL NOT NULL,
+                total_liabilities REAL NOT NULL,
+                net_worth REAL NOT NULL,
+                snapshot_at REAL NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                date TEXT NOT NULL,
+                description TEXT NOT NULL,
+                amount REAL NOT NULL,
+                category TEXT NOT NULL DEFAULT 'Other',
+                source TEXT DEFAULT 'bank_statement',
+                created_at REAL NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS income_sources (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                source TEXT NOT NULL,
+                amount REAL NOT NULL,
+                frequency TEXT NOT NULL DEFAULT 'monthly',
+                is_gross INTEGER NOT NULL DEFAULT 0,
+                created_at REAL NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS bills (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                amount REAL NOT NULL,
+                due_day INTEGER NOT NULL,
+                category TEXT NOT NULL DEFAULT 'Other',
+                auto_pay INTEGER NOT NULL DEFAULT 0,
+                created_at REAL NOT NULL
+            );
         """)
         conn.commit()
 

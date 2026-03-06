@@ -6,6 +6,8 @@ import { usePreferences } from "@/contexts/preferences-context";
 
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard" },
+  { href: "/cash-flow", label: "Cash Flow" },
+  { href: "/net-worth", label: "Net Worth" },
   { href: "/portfolio", label: "Portfolio" },
   {
     label: "Tools",
@@ -19,7 +21,6 @@ const NAV_ITEMS = [
     ],
   },
   { href: "/learn", label: "Learn" },
-  { href: "/reports", label: "Reports" },
 ];
 
 export default function Navbar() {

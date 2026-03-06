@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { analyzeDividend } from "@/lib/api-client";
 import { useApi } from "@/hooks/use-api";
 import SmartMetricCard from "@/components/ui/smart-metric-card";
@@ -11,7 +12,21 @@ import type { DividendAnalysis } from "@/lib/types";
 import { formatCurrency, formatPct } from "@/lib/utils";
 
 export default function DividendsPage() {
+  return (
+    <Suspense>
+      <DividendsContent />
+    </Suspense>
+  );
+}
+
+function DividendsContent() {
+  const searchParams = useSearchParams();
   const [ticker, setTicker] = useState("");
+
+  useEffect(() => {
+    const t = searchParams.get("ticker");
+    if (t) setTicker(t.toUpperCase());
+  }, [searchParams]);
   const { data, loading, error, execute } = useApi(analyzeDividend);
 
   async function handleAnalyze() {
