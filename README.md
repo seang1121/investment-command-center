@@ -1,5 +1,8 @@
 # 📊 Portfolio Analyzer
 
+![GitHub tag](https://img.shields.io/github/v/tag/seang1121/investment-command-center)
+![License](https://img.shields.io/github/license/seang1121/investment-command-center)
+
 **Comprehensive investment portfolio analyzer** — compare 6 distinct strategies across Fidelity mutual funds, ETFs, and best-in-class investments.
 
 ## Quick Start
