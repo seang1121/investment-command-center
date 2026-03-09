@@ -1,0 +1,31 @@
+name: Weekly Portfolio Report
+
+on:
+  schedule:
+    # Every Friday at 4:00 PM EST (21:00 UTC)
+    - cron: '0 21 * * 5'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  generate_report:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Generate portfolio report
+        run: python portfolio_analyzer.py > PORTFOLIO_REPORT.md
+      
+      - name: Commit report to repository
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "Portfolio Bot"
+          git add PORTFOLIO_REPORT.md
+          git commit -m "Weekly portfolio report: $(date +'%Y-%m-%d %H:%M:%S UTC')" || echo "No changes to commit"
+          git push

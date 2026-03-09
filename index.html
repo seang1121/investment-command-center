@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Financial Roadmap Analyzer | Your Complete Investment Guide</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --navy:        #0f2d5e;
+      --navy-light:  #1a3a6e;
+      --green:       #0d9f6f;
+      --green-light: #e8f8f3;
+      --gold:        #c9860a;
+      --gold-bg:     #fffbeb;
+      --bg:          #f4f7fb;
+      --card:        #ffffff;
+      --text:        #1a2744;
+      --muted:       #64748b;
+      --border:      #dde4ef;
+      --shadow:      0 2px 14px rgba(15,45,94,0.07);
+      --radius:      12px;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); font-size:15px; line-height:1.6; }
+
+    /* ── HEADER ── */
+    header { background:linear-gradient(135deg,var(--navy) 0%,#163570 100%); color:#fff; padding:64px 20px 52px; text-align:center; }
+    .header-badge { display:inline-block; background:rgba(13,159,111,.22); color:#3ddbb8; padding:4px 16px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; margin-bottom:16px; }
+    header h1 { font-size:clamp(28px,5vw,50px); font-weight:800; line-height:1.15; margin-bottom:14px; }
+    header h1 span { color:#3ddbb8; }
+    header p { font-size:17px; opacity:.75; max-width:580px; margin:0 auto; }
+
+    /* ── PHASE NAV ── */
+    .phase-nav { background:#fff; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(15,45,94,.06); }
+    .phase-nav-inner { max-width:1100px; margin:0 auto; display:flex; overflow-x:auto; scrollbar-width:none; }
+    .phase-nav-inner::-webkit-scrollbar { display:none; }
+    .ptab { flex:1; min-width:130px; padding:15px 16px 13px; text-align:center; cursor:pointer; border-bottom:3px solid transparent; font-weight:700; font-size:13px; color:var(--muted); white-space:nowrap; user-select:none; transition:all .18s; }
+    .ptab:hover { color:var(--navy); background:#f8fafc; }
+    .ptab.active { color:var(--navy); border-bottom-color:var(--green); background:var(--green-light); }
+    .ptab .ptab-sub { display:block; font-size:10px; font-weight:400; color:var(--muted); margin-top:1px; }
+    .ptab.active .ptab-sub { color:var(--green); }
+
+    /* ── LAYOUT ── */
+    .container { max-width:1100px; margin:0 auto; padding:0 20px; }
+    section.phase { display:none; padding:52px 0 32px; }
+    section.phase.active { display:block; }
+
+    /* ── SECTION HEADER ── */
+    .sec-hdr { margin-bottom:36px; }
+    .sec-hdr h2 { font-size:26px; font-weight:800; color:var(--navy); margin-bottom:8px; }
+    .sec-hdr p { color:var(--muted); font-size:15px; max-width:660px; }
+    .phase-label { display:inline-block; padding:3px 12px; border-radius:20px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+    .pl-now   { background:#dcfce7; color:#166534; }
+    .pl-then  { background:#dbeafe; color:#1e3a8a; }
+    .pl-later { background:#ede9fe; color:#4c1d95; }
+    .pl-ret   { background:#fff3cd; color:#7c4b00; }
+
+    /* ── CARD ── */
+    .card { background:var(--card); border-radius:var(--radius); padding:28px; box-shadow:var(--shadow); border:1px solid var(--border); }
+    .card h3 { font-size:17px; font-weight:700; color:var(--navy); margin-bottom:10px; }
+
+    /* ── GRIDS ── */
+    .g2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+    .g3 { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+    .g4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+    .gauto { display:grid; grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:20px; }
+
+    /* ── NOW SECTION ── */
+    .ef-box { background:#f0f9ff; border-radius:10px; padding:20px; margin-top:18px; }
+    .ef-box label { font-size:11px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; }
+    .ef-box input { width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:7px; font-size:15px; margin:6px 0 12px; outline:none; }
+    .ef-box input:focus { border-color:var(--green); }
+    .ef-result { background:var(--navy); color:#fff; border-radius:7px; padding:14px; text-align:center; font-weight:700; font-size:16px; margin-top:4px; display:none; }
+    .hysa-card { background:linear-gradient(135deg,#0d9f6f,#059669); color:#fff; border-radius:var(--radius); padding:26px; }
+    .hysa-card h4 { font-size:16px; font-weight:700; margin-bottom:6px; }
+    .hysa-card .rate { font-size:48px; font-weight:800; line-height:1; }
+    .hysa-card .rate-lbl { font-size:13px; opacity:.8; margin-top:4px; }
+    .hysa-card ul { list-style:none; margin-top:16px; font-size:13px; opacity:.9; }
+    .hysa-card ul li::before { content:'✓ '; font-weight:700; }
+    .tip-row { display:flex; align-items:flex-start; gap:12px; padding:14px; background:#fffbeb; border-radius:8px; margin-bottom:10px; border-left:4px solid var(--gold); }
+    .tip-row .tip-icon { font-size:20px; flex-shrink:0; margin-top:2px; }
+    .tip-row p { font-size:13px; color:#5a4000; }
+    .tip-row strong { color:var(--navy); }
+
+    /* ── THEN SECTION ── */
+    .then-card { background:var(--card); border-radius:var(--radius); padding:26px; box-shadow:var(--shadow); border:1px solid var(--border); border-top:4px solid; }
+    .then-card.blue { border-top-color:#3b82f6; }
+    .then-card.teal { border-top-color:var(--green); }
+    .then-card.gold { border-top-color:var(--gold); }
+    .then-card .tc-icon { font-size:28px; margin-bottom:12px; }
+    .then-card h4 { font-size:16px; font-weight:700; color:var(--navy); margin-bottom:6px; }
+    .then-card .tc-rate { font-size:28px; font-weight:800; color:var(--green); margin:6px 0; }
+    .then-card p { font-size:13px; color:var(--muted); }
+    .then-card .tc-pros { list-style:none; margin-top:12px; font-size:13px; color:var(--muted); }
+    .then-card .tc-pros li::before { content:'+ '; color:var(--green); font-weight:700; }
+
+    /* ── STRATEGY CARDS ── */
+    .strat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:20px; margin-bottom:8px; }
+    .strat-card { background:var(--card); border-radius:var(--radius); padding:24px; border:2px solid var(--border); cursor:pointer; transition:all .18s; }
+    .strat-card:hover { border-color:var(--green); transform:translateY(-2px); box-shadow:0 8px 24px rgba(13,159,111,.15); }
+    .strat-card.sel { border-color:var(--green); background:var(--green-light); }
+    .strat-emoji { font-size:30px; margin-bottom:10px; display:block; }
+    .strat-name { font-size:17px; font-weight:800; color:var(--navy); }
+    .strat-sub  { font-size:12px; color:var(--muted); margin-bottom:14px; }
+    .strat-badges { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+    .b-ret  { background:#dcfce7; color:#166534; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:700; }
+    .b-down { background:#fee2e2; color:#991b1b; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+    .b-time { background:#eff6ff; color:#1d4ed8; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; }
+    .strat-for { font-size:12px; color:var(--muted); }
+
+    /* ── STRATEGY DETAIL PANEL ── */
+    .strat-panel { display:none; background:#fff; border:2px solid var(--green); border-radius:var(--radius); padding:32px; margin-bottom:28px; animation:fadeIn .2s; }
+    .strat-panel.open { display:block; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+    .panel-grid { display:grid; grid-template-columns:1fr 1fr; gap:32px; }
+    .alloc-row { display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+    .alloc-tick { width:72px; font-size:12px; font-weight:700; color:var(--navy); flex-shrink:0; }
+    .alloc-wrap { flex:1; height:22px; background:#f0f4f8; border-radius:4px; overflow:hidden; }
+    .alloc-fill { height:100%; background:linear-gradient(90deg,var(--navy),#2a5cb8); border-radius:4px; display:flex; align-items:center; padding-left:8px; color:#fff; font-size:11px; font-weight:700; transition:width .5s; }
+    .alloc-pct { width:36px; text-align:right; font-size:12px; font-weight:700; color:var(--navy); }
+
+    /* ── PROJECTION TABLE IN PANEL ── */
+    .proj-table { width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }
+    .proj-table th { background:#f0f4f8; padding:9px 12px; text-align:left; font-weight:700; color:var(--navy); border-bottom:2px solid var(--border); }
+    .proj-table td { padding:9px 12px; border-bottom:1px solid #f0f4f8; }
+    .proj-table tr:last-child td { border-bottom:none; }
+    .bull-c { color:#059669; font-weight:700; }
+    .base-c { color:#1d4ed8; font-weight:700; }
+    .bear-c { color:#dc2626; font-weight:700; }
+
+    /* ── FUND CATALOG ── */
+    .search-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+    .search-row input, .search-row select { padding:10px 14px; border:1px solid var(--border); border-radius:8px; font-size:14px; outline:none; background:#fff; }
+    .search-row input { flex:1; min-width:200px; }
+    .search-row input:focus, .search-row select:focus { border-color:var(--green); }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th { background:var(--navy); color:#fff; padding:11px 14px; text-align:left; font-weight:600; font-size:11px; letter-spacing:.3px; text-transform:uppercase; white-space:nowrap; }
+    td { padding:9px 14px; border-bottom:1px solid #f0f4f8; vertical-align:middle; }
+    tr:hover td { background:#fafbfd; }
+    .tick { display:inline-block; background:#eff6ff; color:var(--navy); padding:2px 8px; border-radius:5px; font-weight:800; font-size:12px; }
+    .rb { padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700; }
+    .rb-vl  { background:#dcfce7; color:#14532d; }
+    .rb-l   { background:#e0f2fe; color:#0c4a6e; }
+    .rb-m   { background:#fef9c3; color:#713f12; }
+    .rb-mh  { background:#ffedd5; color:#7c2d12; }
+    .rb-h   { background:#fee2e2; color:#7f1d1d; }
+    .rb-vh  { background:#ffe4e6; color:#881337; }
+    .rb-x   { background:#1c1c2e; color:#ff5555; }
+    .pos { color:#059669; font-weight:600; }
+    .neg { color:#dc2626; font-weight:600; }
+    .zero { color:var(--muted); }
+    #fund-count { font-size:13px; color:var(--muted); margin-bottom:10px; }
+
+    /* ── SIMULATOR ── */
+    #simulator { background:var(--navy); padding:64px 0 52px; display:block; }
+    #simulator .sec-hdr h2 { color:#fff; }
+    #simulator .sec-hdr p  { color:rgba(255,255,255,.6); }
+    .sim-controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:16px; margin-bottom:28px; }
+    .sc label { display:block; font-size:11px; font-weight:700; color:rgba(255,255,255,.65); text-transform:uppercase; letter-spacing:.6px; margin-bottom:6px; }
+    .sc input, .sc select { width:100%; padding:12px 14px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); border-radius:9px; color:#fff; font-size:15px; outline:none; transition:border-color .2s; }
+    .sc input:focus, .sc select:focus { border-color:var(--green); }
+    .sc select option { background:#1a3a6e; color:#fff; }
+    .period-tabs { display:flex; gap:8px; margin-bottom:22px; }
+    .ptabsim { padding:8px 22px; border-radius:6px; border:1px solid rgba(255,255,255,.2); background:transparent; color:rgba(255,255,255,.55); cursor:pointer; font-weight:700; font-size:13px; transition:all .18s; }
+    .ptabsim:hover { background:rgba(255,255,255,.1); color:#fff; }
+    .ptabsim.active { background:var(--green); border-color:var(--green); color:#fff; }
+    .chart-wrap { background:rgba(255,255,255,.05); border-radius:var(--radius); padding:24px; margin-bottom:24px; }
+    .sim-sum { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:24px; }
+    .scard { background:rgba(255,255,255,.08); border-radius:10px; padding:20px; text-align:center; border:1px solid rgba(255,255,255,.1); }
+    .scard.bull { border-top:3px solid #4ade80; }
+    .scard.base { border-top:3px solid #60a5fa; }
+    .scard.bear { border-top:3px solid #f87171; }
+    .scard .sc-label { font-size:11px; text-transform:uppercase; font-weight:700; letter-spacing:.5px; margin-bottom:6px; }
+    .scard.bull .sc-label { color:#4ade80; }
+    .scard.base .sc-label { color:#60a5fa; }
+    .scard.bear .sc-label { color:#f87171; }
+    .scard .sc-val { font-size:28px; font-weight:800; color:#fff; margin-bottom:4px; }
+    .scard .sc-gain { font-size:13px; font-weight:700; }
+    .scard.bull .sc-gain { color:#4ade80; }
+    .scard.base .sc-gain { color:#60a5fa; }
+    .scard.bear .sc-gain { color:#f87171; }
+    .sim-breakdown { background:rgba(255,255,255,.05); border-radius:var(--radius); padding:20px; }
+    .sim-breakdown h4 { color:rgba(255,255,255,.6); font-size:11px; text-transform:uppercase; letter-spacing:.5px; margin-bottom:14px; }
+    .sbtable th { background:rgba(255,255,255,.1); color:rgba(255,255,255,.8); padding:8px 12px; text-transform:none; letter-spacing:0; }
+    .sbtable td { color:rgba(255,255,255,.75); padding:8px 12px; border-bottom:1px solid rgba(255,255,255,.06); }
+    .sbtable tr:last-child td { border-bottom:none; }
+    .sbtable tr:hover td { background:rgba(255,255,255,.04); }
+
+    /* ── RETIREMENT ── */
+    .ret-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:20px; }
+    .ret-card { background:var(--card); border-radius:var(--radius); padding:26px; box-shadow:var(--shadow); border-left:5px solid var(--navy); }
+    .ret-card.g  { border-left-color:var(--green); }
+    .ret-card.go { border-left-color:var(--gold); }
+    .ret-card.pu { border-left-color:#7c3aed; }
+    .ret-card.bl { border-left-color:#2563eb; }
+    .ret-card .ri { font-size:28px; margin-bottom:12px; }
+    .ret-card h4 { font-size:16px; font-weight:800; color:var(--navy); margin-bottom:4px; }
+    .ret-card .rl { font-size:26px; font-weight:800; color:var(--green); margin:6px 0 10px; }
+    .ret-card p { font-size:13px; color:var(--muted); line-height:1.6; }
+    .ret-card ul { list-style:none; margin-top:12px; }
+    .ret-card ul li { font-size:13px; color:var(--muted); padding:2px 0; }
+    .ret-card ul li::before { content:'✓ '; color:var(--green); font-weight:700; }
+
+    /* ── TOOLS ── */
+    #tools { background:#eef2f9; padding:60px 0; display:block; }
+    #tools .sec-hdr h2 { color:var(--navy); }
+    .tools-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; }
+    .tool-card { background:#fff; border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); border:1px solid var(--border); transition:transform .18s; }
+    .tool-card:hover { transform:translateY(-3px); }
+    .tool-card .ti { font-size:30px; margin-bottom:10px; }
+    .tool-card h4 { font-size:15px; font-weight:700; color:var(--navy); margin-bottom:6px; }
+    .tool-card p { font-size:13px; color:var(--muted); margin-bottom:14px; line-height:1.5; }
+    .tool-card a { font-size:12px; font-weight:700; color:var(--green); text-decoration:none; }
+    .tool-card a:hover { text-decoration:underline; }
+    .ttag { display:inline-block; padding:2px 10px; border-radius:12px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.3px; margin-bottom:10px; }
+    .ttag-g { background:#dcfce7; color:#166534; }
+    .ttag-b { background:#dbeafe; color:#1e3a8a; }
+    .ttag-o { background:#fff3cd; color:#7c4b00; }
+    .ttag-p { background:#f3e8ff; color:#581c87; }
+    .ttag-r { background:#fee2e2; color:#7f1d1d; }
+
+    /* ── DISCLAIMER ── */
+    .disclaimer { background:#fff8f0; border:1px solid #fcd9a3; border-radius:8px; padding:16px 18px; font-size:12px; color:#7c5d0b; line-height:1.7; margin-top:32px; }
+
+    /* ── FOOTER ── */
+    footer { background:var(--navy); color:rgba(255,255,255,.5); padding:32px 20px; text-align:center; font-size:13px; }
+    footer a { color:#60a5fa; text-decoration:none; }
+
+    /* ── RISK QUIZ ── */
+    .quiz-box { background:var(--gold-bg); border:1px solid #f0c060; border-radius:var(--radius); padding:28px; margin-bottom:36px; }
+    .quiz-box h3 { color:var(--navy); margin-bottom:4px; font-size:18px; }
+    .quiz-box .qsub { font-size:13px; color:var(--muted); margin-bottom:20px; }
+    .quiz-q { font-size:14px; font-weight:700; color:var(--navy); margin-bottom:10px; }
+    .quiz-opts { display:flex; flex-direction:column; gap:8px; margin-bottom:18px; }
+    .qopt { padding:11px 16px; background:#fff; border:2px solid #e8d08a; border-radius:8px; cursor:pointer; font-size:13px; transition:all .18s; }
+    .qopt:hover { border-color:var(--navy); background:#f0f4fb; }
+    .qopt.sel { border-color:var(--green); background:var(--green-light); color:var(--navy); font-weight:600; }
+    .quiz-result { display:none; background:var(--navy); color:#fff; border-radius:10px; padding:20px 24px; margin-top:4px; }
+    .quiz-result .qr-title { font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:rgba(255,255,255,.6); margin-bottom:8px; }
+    .quiz-result .qr-strat { font-size:22px; font-weight:800; margin-bottom:6px; }
+    .quiz-result .qr-why { font-size:13px; color:rgba(255,255,255,.75); }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:768px) {
+      .g2,.g3,.g4 { grid-template-columns:1fr; }
+      .panel-grid { grid-template-columns:1fr; gap:20px; }
+      .sim-sum { grid-template-columns:1fr; }
+      header { padding:40px 16px 32px; }
+      .ptab { min-width:100px; font-size:12px; padding:13px 10px; }
+      section.phase { padding:36px 0 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════ HEADER ═══════════════════ -->
+<header>
+  <div class="header-badge">Financial Roadmap Analyzer · Feb 2026</div>
+  <h1>Your Money.<br><span>Your Roadmap.</span></h1>
+  <p>From emergency savings today to retirement wealth tomorrow — a complete advisor-style plan built around your life stage.</p>
+</header>
+
+<!-- ═══════════════════ PHASE NAV ═══════════════════ -->
+<nav class="phase-nav">
+  <div class="phase-nav-inner">
+    <div class="ptab active" onclick="showPhase('now',this)">
+      🏦 NOW
+      <span class="ptab-sub">0 – 6 Months</span>
+    </div>
+    <div class="ptab" onclick="showPhase('then',this)">
+      📅 THEN
+      <span class="ptab-sub">6 Mo – 2 Years</span>
+    </div>
+    <div class="ptab" onclick="showPhase('later',this)">
+      📈 LATER
+      <span class="ptab-sub">2 – 10 Years</span>
+    </div>
+    <div class="ptab" onclick="showPhase('retirement',this)">
+      🌅 RETIREMENT
+      <span class="ptab-sub">10+ Years</span>
+    </div>
+    <div class="ptab" onclick="showPhase('catalog',this)">
+      📚 ALL FUNDS
+      <span class="ptab-sub">Complete Catalog</span>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════════ NOW ═══════════════════ -->
+<section class="phase active" id="phase-now">
+<div class="container">
+  <div class="sec-hdr">
+    <span class="phase-label pl-now">Phase 1 — NOW</span>
+    <h2>Build Your Foundation First</h2>
+    <p>Before investing a single dollar in stocks or funds, get these three pillars in place. A strong foundation protects you from being forced to sell investments at the worst time.</p>
+  </div>
+
+  <!-- STEP INDICATOR -->
+  <div style="display:flex;gap:0;margin-bottom:36px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:130px;padding:16px;background:var(--navy);border-radius:8px 0 0 8px;text-align:center;">
+      <div style="font-size:22px;font-weight:800;color:#3ddbb8;">1</div>
+      <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.75);">Emergency Fund</div>
+    </div>
+    <div style="flex:1;min-width:130px;padding:16px;background:#e8f8f3;border-top:1px solid var(--border);border-bottom:1px solid var(--border);text-align:center;">
+      <div style="font-size:22px;font-weight:800;color:var(--green);">2</div>
+      <div style="font-size:12px;font-weight:600;color:var(--muted);">High-Yield Savings</div>
+    </div>
+    <div style="flex:1;min-width:130px;padding:16px;background:#f4f7fb;border:1px solid var(--border);border-radius:0 8px 8px 0;text-align:center;">
+      <div style="font-size:22px;font-weight:800;color:var(--muted);">3</div>
+      <div style="font-size:12px;font-weight:600;color:var(--muted);">Eliminate Bad Debt</div>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-bottom:28px;">
+    <!-- Emergency Fund Calc -->
+    <div class="card">
+      <h3>🛟 Emergency Fund Calculator</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:6px;">You need 3–6 months of living expenses in a liquid, no-risk account before investing.</p>
+      <div class="ef-box">
+        <label>Monthly Expenses ($)</label>
+        <input type="number" id="ef-monthly" placeholder="e.g. 4500" oninput="calcEF()">
+        <label>Months of Coverage</label>
+        <input type="range" id="ef-months" min="3" max="12" value="6" oninput="calcEF()" style="border:none;background:none;padding:6px 0;margin-bottom:12px;">
+        <div id="ef-months-label" style="font-size:12px;color:var(--muted);margin-bottom:12px;">6 months</div>
+        <div class="ef-result" id="ef-result"></div>
+      </div>
+    </div>
+
+    <!-- HYSA -->
+    <div class="hysa-card">
+      <h4>🏦 High-Yield Savings Account (HYSA)</h4>
+      <div class="rate">4.5–5%</div>
+      <div class="rate-lbl">APY · Current Market Rate (Feb 2026)</div>
+      <ul>
+        <li>FDIC insured up to $250K</li>
+        <li>Fully liquid — withdraw anytime</li>
+        <li>10–15× better than big bank rates (0.01%)</li>
+        <li>Best: Marcus, Ally, SoFi, Discover, Fidelity SPAXX</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- NOW fund options -->
+  <h3 style="color:var(--navy);font-size:18px;margin-bottom:16px;">NOW-Tier Instruments (Liquid &amp; Safe)</h3>
+  <div class="gauto" style="margin-bottom:32px;">
+    <div class="card">
+      <div style="font-size:24px;margin-bottom:8px;">💵</div>
+      <h3>SPAXX — Fidelity Govt Money Market</h3>
+      <div style="font-size:24px;font-weight:800;color:var(--green);margin:6px 0;">~4.9% APY</div>
+      <p style="font-size:13px;color:var(--muted);">Fidelity's default cash account. Invests in US Treasuries &amp; govt securities. Best place to park your emergency fund if you already have a Fidelity account.</p>
+      <div style="margin-top:12px;font-size:12px;color:var(--muted);">Expense: 0.42% | Risk: Very Low | Liquid: Same day</div>
+    </div>
+    <div class="card">
+      <div style="font-size:24px;margin-bottom:8px;">🏛️</div>
+      <h3>BIL — SPDR 1-3 Month T-Bill ETF</h3>
+      <div style="font-size:24px;font-weight:800;color:var(--green);margin:6px 0;">~5.2% Yield</div>
+      <p style="font-size:13px;color:var(--muted);">US Treasury Bills. Backed by the US government — the closest thing to risk-free. Great for emergency fund or cash you'll need within 3 months.</p>
+      <div style="margin-top:12px;font-size:12px;color:var(--muted);">Expense: 0.14% | Risk: Very Low | Trades like a stock</div>
+    </div>
+    <div class="card">
+      <div style="font-size:24px;margin-bottom:8px;">📊</div>
+      <h3>SHY — iShares 1-3 Yr Treasury ETF</h3>
+      <div style="font-size:24px;font-weight:800;color:var(--green);margin:6px 0;">~4.8% Yield</div>
+      <p style="font-size:13px;color:var(--muted);">Slightly longer duration than T-bills but still very safe. Good for cash you won't need for 6–12 months. Slightly more interest rate sensitivity.</p>
+      <div style="margin-top:12px;font-size:12px;color:var(--muted);">Expense: 0.15% | Risk: Very Low | Daily liquidity</div>
+    </div>
+  </div>
+
+  <!-- Tips -->
+  <div class="card">
+    <h3 style="margin-bottom:16px;">📌 Your NOW Action Plan</h3>
+    <div class="tip-row"><div class="tip-icon">1️⃣</div><p><strong>Open a HYSA today.</strong> Move your emergency fund to an account earning 4.5–5% instead of 0.01% at a traditional bank. This is free money.</p></div>
+    <div class="tip-row"><div class="tip-icon">2️⃣</div><p><strong>Target 3–6 months of expenses.</strong> Single, stable job = 3 months. Family, variable income, or commission = 6 months. Self-employed = 9–12 months.</p></div>
+    <div class="tip-row"><div class="tip-icon">3️⃣</div><p><strong>Pay off high-interest debt first.</strong> No investment consistently returns 20%+. If you have credit card debt at 22%, paying it off is a guaranteed 22% return.</p></div>
+    <div class="tip-row"><div class="tip-icon">4️⃣</div><p><strong>Don't over-save here.</strong> Once your emergency fund is funded, move excess cash to THEN or LATER strategies — cash loses to inflation over time.</p></div>
+  </div>
+
+  <div class="disclaimer">⚠️ <strong>Not financial advice.</strong> All rates are approximate and subject to change. HYSA rates reflect current high-rate environment and will fluctuate with Fed policy. FDIC insurance applies to bank accounts, not investment accounts.</div>
+</div>
+</section>
+
+<!-- ═══════════════════ THEN ═══════════════════ -->
+<section class="phase" id="phase-then">
+<div class="container">
+  <div class="sec-hdr">
+    <span class="phase-label pl-then">Phase 2 — THEN</span>
+    <h2>Short-Term Goals &amp; Bridge Investments</h2>
+    <p>Money you'll need in 6 months to 2 years. Too soon for stock market volatility — but too long to leave in a savings account. These instruments bridge the gap.</p>
+  </div>
+
+  <div class="gauto" style="margin-bottom:36px;">
+    <div class="then-card blue">
+      <div class="tc-icon">🪜</div>
+      <h4>CD Ladder Strategy</h4>
+      <div class="tc-rate">5.0–5.4%</div>
+      <p>Certificates of Deposit in multiple maturity dates (3, 6, 9, 12 months). Guaranteed rate, FDIC insured. Lock in today's rates before the Fed cuts further.</p>
+      <ul class="tc-pros">
+        <li>Principal fully protected</li>
+        <li>FDIC insured up to $250K</li>
+        <li>Laddering gives periodic liquidity</li>
+        <li>Lock in today's high rates</li>
+      </ul>
+      <div style="margin-top:14px;">
+        <a href="https://github.com/seang1121/CD-Ladder-Analyzer" target="_blank" style="font-size:12px;font-weight:700;color:#2563eb;text-decoration:none;">→ Use our CD Ladder Analyzer tool</a>
+      </div>
+    </div>
+
+    <div class="then-card teal">
+      <div class="tc-icon">🏛️</div>
+      <h4>I-Bonds (Treasury Direct)</h4>
+      <div class="tc-rate">Inflation + Fixed</div>
+      <p>US Treasury I-Bonds adjust with inflation. Current composite rate reflects CPI. Tax-deferred, exempt from state tax. Must hold 12 months minimum; 3-month interest penalty if redeemed in years 1–5.</p>
+      <ul class="tc-pros">
+        <li>Inflation-protected principal</li>
+        <li>Backed by US Government</li>
+        <li>$10K/year purchase limit per SSN</li>
+        <li>Interest federal-tax deferred</li>
+      </ul>
+    </div>
+
+    <div class="then-card gold">
+      <div class="tc-icon">📦</div>
+      <h4>Short-Term Bond ETFs</h4>
+      <div class="tc-rate">4.5–5.5%</div>
+      <p>ETFs holding short-duration bonds. More liquid than CDs (trade daily), slightly more interest rate risk. Good for goals 1–2 years out where you need flexibility.</p>
+      <ul class="tc-pros">
+        <li>Daily liquidity (unlike CDs)</li>
+        <li>Diversified bond exposure</li>
+        <li>Low expense ratios (0.03–0.04%)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Short-Term ETF Breakdown -->
+  <div class="card" style="margin-bottom:28px;">
+    <h3 style="margin-bottom:18px;">Short-Term ETFs Compared</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Ticker</th><th>Name</th><th>Yield</th><th>Duration</th><th>Expense</th><th>Risk</th><th>Best For</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tick">BIL</span></td><td>SPDR 1-3 Month T-Bill ETF</td><td class="pos">5.2%</td><td>~0.1 yr</td><td>0.14%</td><td><span class="rb rb-vl">Very Low</span></td><td>True short-term parking, &lt;3 months</td></tr>
+          <tr><td><span class="tick">SHY</span></td><td>iShares 1-3 Yr Treasury ETF</td><td class="pos">4.8%</td><td>~1.9 yr</td><td>0.15%</td><td><span class="rb rb-l">Low</span></td><td>6–18 month horizon, slightly more yield</td></tr>
+          <tr><td><span class="tick">VCSH</span></td><td>Vanguard Short-Term Corp Bond ETF</td><td class="pos">5.5%</td><td>~2.8 yr</td><td>0.04%</td><td><span class="rb rb-l">Low</span></td><td>1–2 year goals, wants max short yield</td></tr>
+          <tr><td><span class="tick">BSV</span></td><td>Vanguard Short-Term Bond ETF</td><td class="pos">5.2%</td><td>~2.5 yr</td><td>0.04%</td><td><span class="rb rb-l">Low</span></td><td>Mix of treasuries &amp; corp bonds</td></tr>
+          <tr><td><span class="tick">MINT</span></td><td>PIMCO Enhanced Short Maturity ETF</td><td class="pos">5.4%</td><td>~0.3 yr</td><td>0.36%</td><td><span class="rb rb-vl">Very Low</span></td><td>Ultra-short, actively managed</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Action plan -->
+  <div class="card">
+    <h3 style="margin-bottom:16px;">📌 THEN Strategy by Goal</h3>
+    <div class="gauto">
+      <div style="padding:16px;background:#f0f9ff;border-radius:8px;border-left:4px solid #2563eb;">
+        <div style="font-weight:700;color:var(--navy);margin-bottom:6px;">🚗 Car Down Payment (6–18 mo)</div>
+        <div style="font-size:13px;color:var(--muted);">3-month + 6-month CD ladder. Lock in 5%+ rate. Park the rest in BIL for flexibility.</div>
+      </div>
+      <div style="padding:16px;background:#e8f8f3;border-radius:8px;border-left:4px solid var(--green);">
+        <div style="font-weight:700;color:var(--navy);margin-bottom:6px;">🏠 House Down Payment (1–3 yr)</div>
+        <div style="font-size:13px;color:var(--muted);">I-Bonds (inflation protection) + 12-month CDs + VCSH. Do NOT put this in stocks — too much risk in a 1-3 yr window.</div>
+      </div>
+      <div style="padding:16px;background:#fffbeb;border-radius:8px;border-left:4px solid var(--gold);">
+        <div style="font-weight:700;color:var(--navy);margin-bottom:6px;">✈️ Vacation / Wedding (1–2 yr)</div>
+        <div style="font-size:13px;color:var(--muted);">High-yield savings or 12-month CD. Simple, safe, accessible.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer">⚠️ CD rates and bond yields fluctuate daily. Rates shown are approximate as of Feb 2026. I-Bond rates reset every May and November. Always verify current rates at TreasuryDirect.gov and your brokerage.</div>
+</div>
+</section>
+
+<!-- ═══════════════════ LATER ═══════════════════ -->
+<section class="phase" id="phase-later">
+<div class="container">
+  <div class="sec-hdr">
+    <span class="phase-label pl-later">Phase 3 — LATER</span>
+    <h2>Build Wealth. Choose Your Strategy.</h2>
+    <p>Money you won't need for 2–10+ years. This is where real wealth is built. Choose your risk profile, pick a strategy, and let compound growth do the work.</p>
+  </div>
+
+  <!-- RISK QUIZ -->
+  <div class="quiz-box">
+    <h3>🎯 Not sure which strategy fits you?</h3>
+    <div class="qsub">Answer 3 quick questions and we'll recommend the right one.</div>
+    <div id="quiz-step-1">
+      <div class="quiz-q">1. If your portfolio dropped 30% tomorrow, you would:</div>
+      <div class="quiz-opts">
+        <div class="qopt" onclick="quizAnswer(1,1)">😰 Panic and sell everything</div>
+        <div class="qopt" onclick="quizAnswer(1,2)">😬 Hold on nervously</div>
+        <div class="qopt" onclick="quizAnswer(1,3)">😐 Stay calm — I've planned for this</div>
+        <div class="qopt" onclick="quizAnswer(1,4)">😄 Buy more — it's on sale</div>
+      </div>
+    </div>
+    <div id="quiz-step-2" style="display:none;">
+      <div class="quiz-q">2. Your investment time horizon is:</div>
+      <div class="quiz-opts">
+        <div class="qopt" onclick="quizAnswer(2,1)">📅 Less than 2 years</div>
+        <div class="qopt" onclick="quizAnswer(2,2)">📅 2–5 years</div>
+        <div class="qopt" onclick="quizAnswer(2,3)">📅 5–10 years</div>
+        <div class="qopt" onclick="quizAnswer(2,4)">📅 10+ years / retirement</div>
+      </div>
+    </div>
+    <div id="quiz-step-3" style="display:none;">
+      <div class="quiz-q">3. What is your primary goal?</div>
+      <div class="quiz-opts">
+        <div class="qopt" onclick="quizAnswer(3,1)">🛡️ Preserve capital, steady income</div>
+        <div class="qopt" onclick="quizAnswer(3,2)">⚖️ Balanced growth with some protection</div>
+        <div class="qopt" onclick="quizAnswer(3,3)">🚀 Maximize growth, I can handle volatility</div>
+        <div class="qopt" onclick="quizAnswer(3,4)">🌍 Global exposure and diversification</div>
+      </div>
+    </div>
+    <div class="quiz-result" id="quiz-result">
+      <div class="qr-title">Your Recommended Strategy</div>
+      <div class="qr-strat" id="quiz-strat-name"></div>
+      <div class="qr-why" id="quiz-strat-why"></div>
+    </div>
+  </div>
+
+  <!-- STRATEGY CARDS -->
+  <div class="strat-grid" id="strat-grid"></div>
+
+  <!-- STRATEGY DETAIL PANEL -->
+  <div class="strat-panel" id="strat-panel"></div>
+
+  <div class="disclaimer" style="margin-top:24px;">⚠️ Historical returns do not guarantee future results. All allocations are illustrative. Rebalance quarterly and adjust as life circumstances change.</div>
+</div>
+</section>
+
+<!-- ═══════════════════ RETIREMENT ═══════════════════ -->
+<section class="phase" id="phase-retirement">
+<div class="container">
+  <div class="sec-hdr">
+    <span class="phase-label pl-ret">Phase 4 — RETIREMENT</span>
+    <h2>Tax-Advantaged Wealth for the Long Game</h2>
+    <p>Your retirement accounts are the most powerful wealth-building vehicles available. Understanding contribution limits, tax treatment, and account types can save you hundreds of thousands over a lifetime.</p>
+  </div>
+
+  <!-- Priority Order -->
+  <div class="card" style="margin-bottom:32px;background:var(--navy);border:none;">
+    <h3 style="color:#fff;margin-bottom:16px;">The Optimal Order of Operations</h3>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(255,255,255,.08);border-radius:8px;">
+        <div style="font-size:22px;font-weight:800;color:#4ade80;width:32px;flex-shrink:0;">1</div>
+        <div><div style="color:#fff;font-weight:700;font-size:14px;">Get the full 401(k) employer match</div><div style="color:rgba(255,255,255,.6);font-size:12px;">This is an instant 50–100% return on your money. Always take the free money first.</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(255,255,255,.08);border-radius:8px;">
+        <div style="font-size:22px;font-weight:800;color:#60a5fa;width:32px;flex-shrink:0;">2</div>
+        <div><div style="color:#fff;font-weight:700;font-size:14px;">Max out your HSA (if eligible)</div><div style="color:rgba(255,255,255,.6);font-size:12px;">Triple tax advantage — contributions pre-tax, growth tax-free, withdrawals tax-free for medical. The best account in the US tax code.</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(255,255,255,.08);border-radius:8px;">
+        <div style="font-size:22px;font-weight:800;color:#f9a8d4;width:32px;flex-shrink:0;">3</div>
+        <div><div style="color:#fff;font-weight:700;font-size:14px;">Max out your Roth IRA</div><div style="color:rgba(255,255,255,.6);font-size:12px;">Tax-free growth forever. Best for younger investors in lower tax brackets. $7,000/yr limit (2026).</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(255,255,255,.08);border-radius:8px;">
+        <div style="font-size:22px;font-weight:800;color:#fcd34d;width:32px;flex-shrink:0;">4</div>
+        <div><div style="color:#fff;font-weight:700;font-size:14px;">Max out 401(k) to the full $23,500</div><div style="color:rgba(255,255,255,.6);font-size:12px;">Reduces taxable income today. Grows tax-deferred. 401(k) limits are much higher than IRA limits.</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:rgba(255,255,255,.08);border-radius:8px;">
+        <div style="font-size:22px;font-weight:800;color:#c4b5fd;width:32px;flex-shrink:0;">5</div>
+        <div><div style="color:#fff;font-weight:700;font-size:14px;">Invest in taxable brokerage (LATER strategies)</div><div style="color:rgba(255,255,255,.6);font-size:12px;">Unlimited contributions. Full flexibility. Use tax-efficient ETFs (low turnover, qualified dividends).</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ret-grid">
+    <div class="ret-card g">
+      <div class="ri">🌱</div>
+      <h4>Roth IRA</h4>
+      <div class="rl">$7,000 / yr</div>
+      <p>Contribute after-tax dollars. Everything inside grows 100% tax-free — dividends, capital gains, everything. Withdrawals in retirement are completely tax-free. Best for anyone under 50 who expects to be in a higher tax bracket later.</p>
+      <ul>
+        <li>Income limit: $161K single / $240K married (phases out)</li>
+        <li>Contributions (not gains) withdrawable penalty-free anytime</li>
+        <li>No required minimum distributions (RMDs)</li>
+        <li>Best funds inside: FZROX, VTI, QQQ, SPY</li>
+      </ul>
+    </div>
+
+    <div class="ret-card go">
+      <div class="ri">🏢</div>
+      <h4>Traditional 401(k)</h4>
+      <div class="rl">$23,500 / yr</div>
+      <p>Pre-tax contributions lower your taxable income today. Grows tax-deferred until retirement. Get your full employer match before doing anything else — it's instant 50–100% return.</p>
+      <ul>
+        <li>Employer match: typical 3–6% of salary</li>
+        <li>Traditional: pay taxes at withdrawal (lower bracket in retirement)</li>
+        <li>Roth 401k option: post-tax, tax-free withdrawal</li>
+        <li>Best funds: low-expense index funds (S&amp;P 500, Total Market)</li>
+      </ul>
+    </div>
+
+    <div class="ret-card bl">
+      <div class="ri">🏥</div>
+      <h4>Health Savings Account (HSA)</h4>
+      <div class="rl">$4,300 / yr</div>
+      <p>The best account in the US tax code. Pre-tax contributions, tax-free growth, tax-free withdrawals for medical. After age 65, withdraw for anything (taxed like Traditional IRA). Must have an HDHP health plan to contribute.</p>
+      <ul>
+        <li>Triple tax advantage (contribute → grow → withdraw tax-free)</li>
+        <li>Invest in index funds once balance exceeds $1K–$2K</li>
+        <li>Save receipts — reimburse yourself years later, tax-free</li>
+        <li>Never expires — rolls over every year</li>
+      </ul>
+    </div>
+
+    <div class="ret-card pu">
+      <div class="ri">📚</div>
+      <h4>529 Education Savings</h4>
+      <div class="rl">No annual limit</div>
+      <p>Tax-advantaged savings for education expenses. Contributions made after-tax. Growth and withdrawals are tax-free when used for qualified education expenses (tuition, room, board, books).</p>
+      <ul>
+        <li>State income tax deduction in most states</li>
+        <li>Can change beneficiary to another family member</li>
+        <li>Up to $35K can roll into a Roth IRA (SECURE 2.0)</li>
+        <li>Best for: children, grandchildren, your own education</li>
+      </ul>
+    </div>
+
+    <div class="ret-card g">
+      <div class="ri">🎯</div>
+      <h4>Traditional IRA</h4>
+      <div class="rl">$7,000 / yr</div>
+      <p>Pre-tax contributions (if deductible) with tax-deferred growth. Good if you don't have a 401k at work or are in a higher tax bracket now vs. expected retirement bracket.</p>
+      <ul>
+        <li>Deductibility phases out with workplace 401k access</li>
+        <li>Required Minimum Distributions starting at age 73</li>
+        <li>Backdoor Roth strategy available for high earners</li>
+      </ul>
+    </div>
+
+    <div class="ret-card go">
+      <div class="ri">🏘️</div>
+      <h4>Real Estate + REITs</h4>
+      <div class="rl">Unlimited</div>
+      <p>Real estate exposure without owning property. REITs (Real Estate Investment Trusts) are required to distribute 90%+ of taxable income as dividends. Good inflation hedge and income stream.</p>
+      <ul>
+        <li>VNQ — Vanguard REIT ETF (diversified real estate)</li>
+        <li>O — Realty Income (monthly dividend "bond alternative")</li>
+        <li>AMT — American Tower (cell towers, data centers)</li>
+        <li>Hold in Roth IRA — REIT dividends taxed as ordinary income</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="disclaimer" style="margin-top:28px;">⚠️ Contribution limits and income thresholds are for 2026. Tax laws change frequently. Consult a qualified tax advisor or CFP for personalized retirement planning. Catch-up contributions available at age 50+.</div>
+</div>
+</section>
+
+<!-- ═══════════════════ FUND CATALOG ═══════════════════ -->
+<section class="phase" id="phase-catalog">
+<div class="container">
+  <div class="sec-hdr">
+    <span class="phase-label pl-later">Complete Fund Catalog</span>
+    <h2>All Funds, Stocks &amp; ETFs</h2>
+    <p>Every instrument in our universe — searchable and filterable. Data for illustration purposes; verify current rates at your brokerage before investing.</p>
+  </div>
+
+  <div class="search-row">
+    <input type="text" id="fund-search" placeholder="Search ticker or name..." oninput="filterFunds()">
+    <select id="fund-type" onchange="filterFunds()">
+      <option value="">All Types</option>
+      <option value="Money Market">Money Market</option>
+      <option value="Fidelity Fund">Fidelity Fund</option>
+      <option value="Fidelity Sector">Fidelity Sector</option>
+      <option value="ETF">ETF</option>
+      <option value="Stock">Stock</option>
+    </select>
+    <select id="fund-phase" onchange="filterFunds()">
+      <option value="">All Phases</option>
+      <option value="now">NOW (Liquid/Safe)</option>
+      <option value="then">THEN (Short-Term)</option>
+      <option value="later">LATER (Growth)</option>
+    </select>
+    <select id="fund-risk" onchange="filterFunds()">
+      <option value="">All Risk Levels</option>
+      <option value="Very Low">Very Low</option>
+      <option value="Low">Low</option>
+      <option value="Moderate">Moderate</option>
+      <option value="Moderate-High">Moderate-High</option>
+      <option value="High">High</option>
+      <option value="Very High">Very High</option>
+      <option value="Extreme">Extreme</option>
+    </select>
+  </div>
+  <div id="fund-count"></div>
+  <div class="card" style="padding:0;overflow:hidden;">
+    <div class="table-wrap">
+      <table id="fund-table">
+        <thead><tr>
+          <th>Ticker</th><th>Name</th><th>Type</th><th>Phase</th>
+          <th>1-Yr Return</th><th>3-Yr Return</th><th>Dividend</th><th>Expense</th><th>Risk</th>
+        </tr></thead>
+        <tbody id="fund-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════ SIMULATOR ═══════════════════ -->
+<section id="simulator">
+<div class="container">
+  <div class="sec-hdr">
+    <h2>📊 Growth Simulator</h2>
+    <p>Enter your numbers. See where your money could be in 6 months, 1 year, and 2 years across bull, base, and bear market scenarios.</p>
+  </div>
+
+  <div class="sim-controls">
+    <div class="sc">
+      <label>Initial Investment ($)</label>
+      <input type="number" id="sim-principal" value="10000" min="0" oninput="runSim()">
+    </div>
+    <div class="sc">
+      <label>Monthly Contribution ($)</label>
+      <input type="number" id="sim-monthly" value="500" min="0" oninput="runSim()">
+    </div>
+    <div class="sc">
+      <label>Strategy</label>
+      <select id="sim-strategy" onchange="runSim()">
+        <option value="1">🛡️ Conservative (5–7%)</option>
+        <option value="2">🎯 Moderate (8–12%)</option>
+        <option value="3" selected>📈 Growth (12–18%)</option>
+        <option value="4">🚀 Aggressive (25–40%)</option>
+        <option value="5">💥 Moonshot (60–150%+)</option>
+        <option value="6">🌍 Global Diversified (10–16%)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="period-tabs">
+    <button class="ptabsim active" onclick="setPeriod(6,this)">6 Months</button>
+    <button class="ptabsim" onclick="setPeriod(12,this)">1 Year</button>
+    <button class="ptabsim" onclick="setPeriod(24,this)">2 Years</button>
+  </div>
+
+  <div class="chart-wrap">
+    <canvas id="simChart" height="100"></canvas>
+  </div>
+
+  <div class="sim-sum">
+    <div class="scard bull">
+      <div class="sc-label">Bull Case</div>
+      <div class="sc-val" id="sum-bull">—</div>
+      <div class="sc-gain" id="sum-bull-g">—</div>
+    </div>
+    <div class="scard base">
+      <div class="sc-label">Base Case</div>
+      <div class="sc-val" id="sum-base">—</div>
+      <div class="sc-gain" id="sum-base-g">—</div>
+    </div>
+    <div class="scard bear">
+      <div class="sc-label">Bear Case</div>
+      <div class="sc-val" id="sum-bear">—</div>
+      <div class="sc-gain" id="sum-bear-g">—</div>
+    </div>
+  </div>
+
+  <div class="sim-breakdown">
+    <h4>Month-by-Month Breakdown</h4>
+    <div style="overflow-x:auto;">
+      <table class="sbtable" id="sim-breakdown-table">
+        <thead><tr><th>Month</th><th>Invested</th><th>Bull Value</th><th>Base Value</th><th>Bear Value</th></tr></thead>
+        <tbody id="sim-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════ TOOLS ═══════════════════ -->
+<section id="tools">
+<div class="container">
+  <div class="sec-hdr">
+    <h2>🧰 More Tools &amp; Resources</h2>
+    <p>A complete financial roadmap uses more than just stock picks. These are the other instruments, tools, and accounts worth knowing.</p>
+  </div>
+  <div class="tools-grid">
+    <div class="tool-card">
+      <div class="ti">🪜</div>
+      <div class="ttag ttag-b">Our Tool</div>
+      <h4>CD Ladder Analyzer</h4>
+      <p>Compare CD rates across institutions (Navy Federal, Pentagon Federal, Connexus). Optimize your ladder strategy for maximum guaranteed return.</p>
+      <a href="https://github.com/seang1121/CD-Ladder-Analyzer" target="_blank">→ Open CD Ladder Analyzer</a>
+    </div>
+    <div class="tool-card">
+      <div class="ti">🧮</div>
+      <div class="ttag ttag-g">Free Tool</div>
+      <h4>Dollar-Cost Averaging</h4>
+      <p>Never invest a lump sum — spread it over 3–6 months. DCA reduces timing risk and takes emotion out of investing. Works for every strategy.</p>
+      <p style="margin-top:8px;font-size:12px;color:var(--muted);">Use the Growth Simulator above with a monthly contribution amount.</p>
+    </div>
+    <div class="tool-card">
+      <div class="ti">📉</div>
+      <div class="ttag ttag-o">Strategy</div>
+      <h4>Tax-Loss Harvesting</h4>
+      <p>Sell losing positions to offset gains and reduce your tax bill. Immediately buy a similar (not identical) fund to stay in the market. Available in taxable accounts.</p>
+    </div>
+    <div class="tool-card">
+      <div class="ti">💛</div>
+      <div class="ttag ttag-o">Hedge</div>
+      <h4>Gold (GLD)</h4>
+      <p>5–10% gold allocation hedges against inflation and market crashes. Gold often rises when stocks fall. Not a growth asset — a crisis hedge. SPDR GLD expense: 0.40%.</p>
+    </div>
+    <div class="tool-card">
+      <div class="ti">🏘️</div>
+      <div class="ttag ttag-g">Income</div>
+      <h4>REITs (VNQ, O)</h4>
+      <p>Real estate exposure without owning property. VNQ gives broad REIT exposure. Realty Income (O) pays monthly dividends. Hold in Roth IRA to shelter REIT dividend income.</p>
+    </div>
+    <div class="tool-card">
+      <div class="ti">⚡</div>
+      <div class="ttag ttag-r">Advanced</div>
+      <h4>Covered Calls</h4>
+      <p>If you own 100+ shares of a stock, you can sell covered calls to generate additional income (2–5% extra yield). Advanced strategy — learn before using.</p>
+    </div>
+    <div class="tool-card">
+      <div class="ti">🌐</div>
+      <div class="ttag ttag-p">Diversification</div>
+      <h4>International Exposure</h4>
+      <p>US stocks are only ~60% of global market cap. VXUS and IEMG give you the other 40%. Reduces dependency on US economic cycles. Recommended: 10–20% of portfolio.</p>
+    </div>
+    <div class="tool-card">
+      <div class="ti">🤖</div>
+      <div class="ttag ttag-b">Automation</div>
+      <h4>Auto-Rebalancing</h4>
+      <p>Set target allocations and rebalance when any position drifts &gt;20% from target. Most brokerages offer automatic quarterly rebalancing for free in retirement accounts.</p>
+    </div>
+    <div class="tool-card">
+      <div class="ti">📊</div>
+      <div class="ttag ttag-g">Must Know</div>
+      <h4>Expense Ratio Impact</h4>
+      <p>A 1% expense ratio on $100K costs you $1K/year — but the real cost is $40K+ over 20 years due to lost compounding. Always prefer index funds with 0.03–0.20% expense ratios.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer>
+  <p style="margin-bottom:8px;"><strong style="color:#fff;">Financial Roadmap Analyzer</strong> &nbsp;|&nbsp; 55+ Funds, Stocks &amp; ETFs &nbsp;|&nbsp; 4 Life Stages &nbsp;|&nbsp; Feb 2026</p>
+  <p>Built by <a href="https://github.com/seang1121">seang1121</a> &nbsp;|&nbsp; <a href="https://github.com/seang1121/Fidelity-Fund-Analyzer">View on GitHub</a></p>
+  <p style="margin-top:10px;font-size:11px;opacity:.55;">For educational purposes only. Not financial advice. Past performance does not guarantee future results. Always verify current data before investing.</p>
+</footer>
+
+<!-- ═══════════════════ JAVASCRIPT ═══════════════════ -->
+<script>
+// ── ALL FUNDS DATA ──────────────────────────────────────────────
+const FUNDS = [
+  // NOW — Liquid & Safe
+  { t:'SPAXX', n:'Fidelity Govt Money Market',               type:'Money Market',   phase:'now',  y1:4.9,  y3:3.2,  div:4.90, exp:0.42, risk:'Very Low' },
+  { t:'BIL',   n:'SPDR Bloomberg 1-3 Month T-Bill ETF',      type:'ETF',            phase:'now',  y1:5.2,  y3:3.8,  div:5.00, exp:0.14, risk:'Very Low' },
+  { t:'SHY',   n:'iShares 1-3 Year Treasury Bond ETF',       type:'ETF',            phase:'now',  y1:4.8,  y3:2.8,  div:4.50, exp:0.15, risk:'Very Low' },
+  // THEN — Short-Term
+  { t:'VCSH',  n:'Vanguard Short-Term Corp Bond ETF',        type:'ETF',            phase:'then', y1:5.5,  y3:3.5,  div:4.80, exp:0.04, risk:'Low' },
+  { t:'BSV',   n:'Vanguard Short-Term Bond ETF',             type:'ETF',            phase:'then', y1:5.2,  y3:2.9,  div:4.40, exp:0.04, risk:'Low' },
+  { t:'MINT',  n:'PIMCO Enhanced Short Maturity ETF',        type:'ETF',            phase:'then', y1:5.4,  y3:3.6,  div:5.20, exp:0.36, risk:'Very Low' },
+  // LATER — Fidelity Zero
+  { t:'FZROX', n:'Fidelity Zero Total Market Index',         type:'Fidelity Fund',  phase:'later',y1:24.0, y3:10.5, div:1.20, exp:0.00, risk:'Moderate' },
+  { t:'FZILX', n:'Fidelity Zero International Index',        type:'Fidelity Fund',  phase:'later',y1:8.0,  y3:5.5,  div:2.80, exp:0.00, risk:'Moderate-High' },
+  // LATER — Fidelity Index
+  { t:'FXAIX', n:'Fidelity 500 Index Fund (S&P 500)',        type:'Fidelity Fund',  phase:'later',y1:22.0, y3:10.2, div:1.50, exp:0.015,risk:'Moderate' },
+  { t:'FSKAX', n:'Fidelity Total Market Index Fund',         type:'Fidelity Fund',  phase:'later',y1:23.5, y3:10.0, div:1.40, exp:0.015,risk:'Moderate' },
+  // LATER — Fidelity Active
+  { t:'FFVTX', n:'Fidelity Large Cap Growth Enhanced Index', type:'Fidelity Fund',  phase:'later',y1:35.0, y3:38.0, div:0.50, exp:0.65, risk:'High' },
+  { t:'FLPSX', n:'Fidelity Growth Company Fund',             type:'Fidelity Fund',  phase:'later',y1:38.0, y3:40.0, div:0.20, exp:0.70, risk:'Very High' },
+  { t:'FAGIX', n:'Fidelity Capital & Income Fund',           type:'Fidelity Fund',  phase:'later',y1:16.0, y3:12.0, div:5.20, exp:0.68, risk:'Moderate-High' },
+  { t:'FEMKX', n:'Fidelity Emerging Markets Fund',           type:'Fidelity Fund',  phase:'later',y1:14.0, y3:8.0,  div:1.80, exp:0.63, risk:'High' },
+  { t:'FIEUX', n:'Fidelity Europe Fund',                     type:'Fidelity Fund',  phase:'later',y1:11.0, y3:5.5,  div:2.50, exp:0.98, risk:'Moderate-High' },
+  // LATER — Fidelity Sector
+  { t:'FBIOX', n:'Fidelity Select Biotechnology Portfolio',  type:'Fidelity Sector',phase:'later',y1:28.0, y3:52.0, div:0.30, exp:0.90, risk:'Very High' },
+  { t:'FSHBX', n:'Fidelity Select Semiconductors Portfolio', type:'Fidelity Sector',phase:'later',y1:62.0, y3:58.0, div:0.40, exp:0.95, risk:'Extreme' },
+  { t:'FSPHX', n:'Fidelity Select Health Care Portfolio',    type:'Fidelity Sector',phase:'later',y1:32.0, y3:28.0, div:0.20, exp:0.88, risk:'Very High' },
+  // LATER — Fidelity Bonds
+  { t:'FBNDX', n:'Fidelity Investment Grade Bond Fund',      type:'Fidelity Fund',  phase:'later',y1:5.0,  y3:3.0,  div:3.50, exp:0.45, risk:'Low' },
+  { t:'FTABX', n:'Fidelity Total Bond Fund',                 type:'Fidelity Fund',  phase:'later',y1:5.0,  y3:3.0,  div:4.00, exp:0.25, risk:'Low' },
+  // LATER — S&P 500 / Broad ETFs
+  { t:'SPY',   n:'SPDR S&P 500 ETF Trust',                   type:'ETF',            phase:'later',y1:22.0, y3:10.2, div:1.30, exp:0.09, risk:'Moderate' },
+  { t:'VOO',   n:'Vanguard S&P 500 ETF',                     type:'ETF',            phase:'later',y1:22.0, y3:10.2, div:1.40, exp:0.03, risk:'Moderate' },
+  { t:'IVV',   n:'iShares Core S&P 500 ETF',                 type:'ETF',            phase:'later',y1:22.0, y3:10.2, div:1.40, exp:0.03, risk:'Moderate' },
+  { t:'VTI',   n:'Vanguard Total Stock Market ETF',          type:'ETF',            phase:'later',y1:22.5, y3:10.0, div:1.50, exp:0.03, risk:'Moderate' },
+  { t:'ITOT',  n:'iShares Core S&P Total US Stock ETF',      type:'ETF',            phase:'later',y1:22.5, y3:10.0, div:1.50, exp:0.03, risk:'Moderate' },
+  { t:'IWM',   n:'iShares Russell 2000 ETF (Small Cap)',     type:'ETF',            phase:'later',y1:18.0, y3:7.5,  div:1.20, exp:0.19, risk:'Moderate-High' },
+  // LATER — Tech ETFs
+  { t:'QQQ',   n:'Invesco QQQ Trust (Nasdaq 100)',           type:'ETF',            phase:'later',y1:28.0, y3:32.0, div:0.40, exp:0.20, risk:'High' },
+  { t:'QQQM',  n:'Invesco Nasdaq 100 ETF (smaller shares)',  type:'ETF',            phase:'later',y1:28.0, y3:32.0, div:0.40, exp:0.15, risk:'High' },
+  { t:'XLK',   n:'Technology Select Sector SPDR ETF',       type:'ETF',            phase:'later',y1:32.0, y3:38.0, div:0.50, exp:0.10, risk:'High' },
+  { t:'SMH',   n:'VanEck Semiconductor ETF',                 type:'ETF',            phase:'later',y1:68.0, y3:85.0, div:0.80, exp:0.35, risk:'Very High' },
+  { t:'SOXX',  n:'iShares Semiconductor & Related ETF',      type:'ETF',            phase:'later',y1:65.0, y3:80.0, div:0.90, exp:0.35, risk:'Very High' },
+  // LATER — Mega-Cap Stocks
+  { t:'NVDA',  n:'NVIDIA Corporation',                       type:'Stock',          phase:'later',y1:180.0,y3:220.0,div:0.03, exp:0.00, risk:'Very High' },
+  { t:'AAPL',  n:'Apple Inc.',                               type:'Stock',          phase:'later',y1:22.0, y3:28.0, div:0.50, exp:0.00, risk:'Moderate-High' },
+  { t:'MSFT',  n:'Microsoft Corporation',                    type:'Stock',          phase:'later',y1:18.0, y3:30.0, div:0.70, exp:0.00, risk:'Moderate-High' },
+  { t:'GOOGL', n:'Alphabet Inc. (Google)',                   type:'Stock',          phase:'later',y1:38.0, y3:25.0, div:0.00, exp:0.00, risk:'High' },
+  { t:'AMZN',  n:'Amazon.com Inc.',                          type:'Stock',          phase:'later',y1:42.0, y3:22.0, div:0.00, exp:0.00, risk:'High' },
+  { t:'META',  n:'Meta Platforms Inc.',                      type:'Stock',          phase:'later',y1:68.0, y3:55.0, div:0.40, exp:0.00, risk:'High' },
+  { t:'TSLA',  n:'Tesla Inc.',                               type:'Stock',          phase:'later',y1:92.0, y3:15.0, div:0.00, exp:0.00, risk:'Extreme' },
+  { t:'BRK.B', n:'Berkshire Hathaway Class B',               type:'Stock',          phase:'later',y1:20.0, y3:18.0, div:0.00, exp:0.00, risk:'Moderate' },
+  // LATER — Specialty ETFs
+  { t:'ARKK',  n:'ARK Innovation ETF',                       type:'ETF',            phase:'later',y1:52.0, y3:42.0, div:0.20, exp:0.75, risk:'Extreme' },
+  { t:'IBIT',  n:'iShares Bitcoin ETF',                      type:'ETF',            phase:'later',y1:168.0,y3:142.0,div:0.00, exp:0.20, risk:'Extreme' },
+  { t:'GLD',   n:'SPDR Gold Shares ETF',                     type:'ETF',            phase:'later',y1:22.0, y3:14.0, div:0.00, exp:0.40, risk:'Moderate' },
+  { t:'VNQ',   n:'Vanguard Real Estate ETF (REIT)',          type:'ETF',            phase:'later',y1:8.0,  y3:5.0,  div:4.20, exp:0.12, risk:'Moderate' },
+  { t:'ICLN',  n:'iShares Global Clean Energy ETF',          type:'ETF',            phase:'later',y1:31.0, y3:35.0, div:1.80, exp:0.40, risk:'High' },
+  { t:'IBB',   n:'iShares Nasdaq Biotechnology ETF',         type:'ETF',            phase:'later',y1:18.0, y3:10.0, div:0.30, exp:0.45, risk:'Very High' },
+  // LATER — Dividend ETFs
+  { t:'SCHD',  n:'Schwab US Dividend Equity ETF',            type:'ETF',            phase:'later',y1:12.0, y3:11.0, div:3.50, exp:0.06, risk:'Moderate' },
+  { t:'VYM',   n:'Vanguard High Dividend Yield ETF',         type:'ETF',            phase:'later',y1:11.0, y3:10.0, div:3.80, exp:0.06, risk:'Moderate' },
+  { t:'DVY',   n:'iShares Select Dividend ETF',              type:'ETF',            phase:'later',y1:9.0,  y3:7.0,  div:4.50, exp:0.38, risk:'Moderate' },
+  // LATER — Bond ETFs
+  { t:'BND',   n:'Vanguard Total Bond Market ETF',           type:'ETF',            phase:'later',y1:5.0,  y3:3.0,  div:4.20, exp:0.03, risk:'Low' },
+  { t:'AGG',   n:'iShares Core US Aggregate Bond ETF',       type:'ETF',            phase:'later',y1:5.0,  y3:3.0,  div:4.40, exp:0.03, risk:'Low' },
+  { t:'TLT',   n:'iShares 20+ Year Treasury Bond ETF',       type:'ETF',            phase:'later',y1:3.0,  y3:-5.0, div:4.60, exp:0.15, risk:'Moderate' },
+  // LATER — International ETFs
+  { t:'VXUS',  n:'Vanguard Total International Stock ETF',   type:'ETF',            phase:'later',y1:9.0,  y3:5.5,  div:2.80, exp:0.09, risk:'Moderate-High' },
+  { t:'IEMG',  n:'iShares Core MSCI Emerging Markets ETF',   type:'ETF',            phase:'later',y1:16.0, y3:8.0,  div:2.20, exp:0.08, risk:'High' },
+];
+
+// ── STRATEGIES DATA ─────────────────────────────────────────────
+const STRATS = {
+  1:{ n:'Conservative', e:'🛡️', sub:'Capital Preservation + Steady Income',
+      ret:'5–7%', down:'-15%', hz:'1–3 years', for:'Risk-averse, income-focused, near retirement',
+      bull:7, base:6, bear:1,
+      alloc:{'FBNDX':40,'FTABX':20,'BND':15,'SCHD':15,'FXAIX':10} },
+  2:{ n:'Moderate', e:'🎯', sub:'Balanced Growth + Income',
+      ret:'8–12%', down:'-25%', hz:'2–5 years', for:'Mid-career professional, 401k alternative',
+      bull:12, base:10, bear:-2,
+      alloc:{'FSKAX':25,'FXAIX':20,'BND':20,'FAGIX':15,'VXUS':10,'SCHD':10} },
+  3:{ n:'Growth', e:'📈', sub:'Solid Growth + Diversification',
+      ret:'12–18%', down:'-35%', hz:'3–5 years', for:'Growth-oriented, medium risk tolerance',
+      bull:18, base:15, bear:-8,
+      alloc:{'FFVTX':18,'QQQ':15,'FXAIX':15,'BND':15,'FBIOX':10,'IEMG':10,'ICLN':9,'SCHD':8} },
+  4:{ n:'Aggressive', e:'🚀', sub:'High Growth + Concentrated Bets',
+      ret:'25–40%', down:'-50%', hz:'3–5 years', for:'High risk tolerance, young investor',
+      bull:40, base:30, bear:-20,
+      alloc:{'QQQ':18,'FBIOX':12,'FFVTX':12,'FLPSX':10,'SMH':10,'ARKK':8,'IEMG':8,'IBB':7,'ICLN':8,'BND':7} },
+  5:{ n:'Moonshot', e:'💥', sub:'Maximum Growth + Crypto + Innovation',
+      ret:'60–150%+', down:'-70%+', hz:'3–7 years', for:'Extreme risk tolerance, YOLO mindset',
+      bull:110, base:65, bear:-45,
+      alloc:{'IBIT':20,'ARKK':15,'QQQ':15,'FSHBX':12,'SMH':10,'FLPSX':10,'IBB':8,'FBIOX':5,'ICLN':5} },
+  6:{ n:'Global Diversified', e:'🌍', sub:'Balanced Global + Sector Rotation',
+      ret:'10–16%', down:'-30%', hz:'3–5 years', for:'International exposure, currency hedging',
+      bull:16, base:13, bear:-6,
+      alloc:{'FXAIX':18,'VXUS':15,'IEMG':12,'QQQ':12,'FIEUX':10,'BND':15,'SCHD':10,'ICLN':5,'FAGIX':3} },
+};
+
+// ── PHASE NAVIGATION ────────────────────────────────────────────
+function showPhase(id, el) {
+  document.querySelectorAll('.phase').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  document.getElementById('phase-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── EMERGENCY FUND CALC ─────────────────────────────────────────
+function calcEF() {
+  const monthly = parseFloat(document.getElementById('ef-monthly').value) || 0;
+  const months  = parseInt(document.getElementById('ef-months').value)   || 6;
+  document.getElementById('ef-months-label').textContent = months + ' months';
+  if (!monthly) { document.getElementById('ef-result').style.display='none'; return; }
+  const total = monthly * months;
+  const el = document.getElementById('ef-result');
+  el.style.display = 'block';
+  el.textContent = `Your emergency fund target: $${total.toLocaleString()}`;
+}
+
+// ── RISK QUIZ ───────────────────────────────────────────────────
+const quizAnswers = {};
+function quizAnswer(step, val) {
+  quizAnswers[step] = val;
+  document.querySelectorAll(`#quiz-step-${step} .qopt`).forEach(o => o.classList.remove('sel'));
+  event.target.classList.add('sel');
+  if (step < 3) {
+    document.getElementById(`quiz-step-${step}`).style.display='none';
+    document.getElementById(`quiz-step-${step+1}`).style.display='block';
+  } else {
+    showQuizResult();
+  }
+}
+
+function showQuizResult() {
+  const r1 = quizAnswers[1]||2, r2 = quizAnswers[2]||2, r3 = quizAnswers[3]||2;
+  let score = r1 + r2 + r3;
+  let sid, why;
+  if (score <= 4)       { sid=1; why='You prefer stability and income over growth. Conservative bonds + dividend funds are your match.'; }
+  else if (score <= 6)  { sid=2; why='You want balanced growth with protection. A 60/40 blend gives you upside with a safety net.'; }
+  else if (score <= 8)  { sid=3; why='You can handle volatility and have time on your side. A growth-focused strategy fits your profile.'; }
+  else if (score <= 10) { sid=4; why='High risk tolerance and a long time horizon — an aggressive concentrated portfolio maximizes your potential.'; }
+  else if (r3 === 4)    { sid=6; why='You value global diversification and want exposure beyond US markets.'; }
+  else                  { sid=5; why='You\'re swinging for the fences. Moonshot strategy for maximum upside — understand you can lose 50%+.'; }
+
+  const s = STRATS[sid];
+  document.getElementById('quiz-strat-name').textContent = s.e + ' ' + s.n + ' Strategy';
+  document.getElementById('quiz-strat-why').textContent = why;
+  document.getElementById('quiz-result').style.display = 'block';
+}
+
+// ── BUILD STRATEGY CARDS ─────────────────────────────────────────
+function buildStratCards() {
+  const grid = document.getElementById('strat-grid');
+  grid.innerHTML = '';
+  Object.entries(STRATS).forEach(([id, s]) => {
+    const div = document.createElement('div');
+    div.className = 'strat-card';
+    div.onclick = () => togglePanel(parseInt(id));
+    div.innerHTML = `
+      <span class="strat-emoji">${s.e}</span>
+      <div class="strat-name">${s.n}</div>
+      <div class="strat-sub">${s.sub}</div>
+      <div class="strat-badges">
+        <span class="b-ret">${s.ret}</span>
+        <span class="b-down">${s.down}</span>
+        <span class="b-time">${s.hz}</span>
+      </div>
+      <div class="strat-for">Best for: ${s.for}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+// ── STRATEGY DETAIL PANEL ────────────────────────────────────────
+let openPanel = null;
+function togglePanel(id) {
+  const panel = document.getElementById('strat-panel');
+  const cards = document.querySelectorAll('.strat-card');
+  if (openPanel === id) {
+    panel.classList.remove('open'); openPanel = null;
+    cards.forEach(c => c.classList.remove('sel'));
+    return;
+  }
+  openPanel = id;
+  cards.forEach((c,i) => c.classList.toggle('sel', i+1 === id));
+
+  const s = STRATS[id];
+  const principal = 10000;
+
+  // Build allocation rows
+  const allocHTML = Object.entries(s.alloc).map(([tk, pct]) => {
+    const fund = FUNDS.find(f => f.t === tk);
+    const fname = fund ? fund.n : tk;
+    return `<div class="alloc-row">
+      <div class="alloc-tick">${tk}</div>
+      <div class="alloc-wrap"><div class="alloc-fill" style="width:${pct}%">${pct >= 10 ? pct+'%' : ''}</div></div>
+      <div class="alloc-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+
+  // Build projection table
+  function proj(rate, mo) {
+    const r = rate/100/12;
+    let v = principal;
+    for (let i=0;i<mo;i++) v = v*(1+r);
+    return v;
+  }
+  const periods = [[6,'6 Months'],[12,'1 Year'],[24,'2 Years']];
+  const projHTML = periods.map(([mo, lbl]) => {
+    const bull = proj(s.bull, mo);
+    const base = proj(s.base, mo);
+    const bear = proj(s.bear, mo);
+    const fmt = v => v < 0 ? `-$${Math.abs(v-principal).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',')}` :
+      `$${v.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',')}`;
+    return `<tr>
+      <td><strong>${lbl}</strong></td>
+      <td class="bull-c">${fmt(bull)}</td>
+      <td class="base-c">${fmt(base)}</td>
+      <td class="bear-c">${fmt(bear)}</td>
+    </tr>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap;">
+      <div style="font-size:36px;">${s.e}</div>
+      <div>
+        <h2 style="color:var(--navy);font-size:22px;font-weight:800;">${s.n}</h2>
+        <div style="color:var(--muted);font-size:14px;">${s.sub} &nbsp;|&nbsp; ${s.ret} expected &nbsp;|&nbsp; ${s.down} max drawdown</div>
+      </div>
+    </div>
+    <div class="panel-grid">
+      <div>
+        <h4 style="color:var(--navy);margin-bottom:14px;font-size:15px;">Portfolio Allocation</h4>
+        ${allocHTML}
+      </div>
+      <div>
+        <h4 style="color:var(--navy);margin-bottom:14px;font-size:15px;">$10,000 Projection (lump sum)</h4>
+        <table class="proj-table">
+          <thead><tr><th>Period</th><th class="bull-c">Bull</th><th class="base-c">Base</th><th class="bear-c">Bear</th></tr></thead>
+          <tbody>${projHTML}</tbody>
+        </table>
+        <div style="margin-top:18px;padding:14px;background:#f0f9ff;border-radius:8px;font-size:12px;color:var(--muted);">
+          <strong style="color:var(--navy);">Bull:</strong> ${s.bull}% annual &nbsp;&nbsp;
+          <strong style="color:var(--navy);">Base:</strong> ${s.base}% annual &nbsp;&nbsp;
+          <strong style="color:var(--navy);">Bear:</strong> ${s.bear}% annual &nbsp;&nbsp;
+          (lump sum, no contributions)
+        </div>
+      </div>
+    </div>`;
+
+  panel.classList.add('open');
+  setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'nearest' }), 50);
+}
+
+// ── FUND CATALOG ─────────────────────────────────────────────────
+function riskClass(r) {
+  const map = { 'Very Low':'rb-vl','Low':'rb-l','Moderate':'rb-m','Moderate-High':'rb-mh','High':'rb-h','Very High':'rb-vh','Extreme':'rb-x' };
+  return map[r] || 'rb-m';
+}
+function phaseLabel(p) {
+  const map = { now:'<span style="color:#166534;font-weight:700;">NOW</span>', then:'<span style="color:#1e3a8a;font-weight:700;">THEN</span>', later:'<span style="color:#4c1d95;font-weight:700;">LATER</span>' };
+  return map[p] || p;
+}
+
+function buildFundTable(data) {
+  const tbody = document.getElementById('fund-tbody');
+  tbody.innerHTML = data.map(f => `<tr>
+    <td><span class="tick">${f.t}</span></td>
+    <td>${f.n}</td>
+    <td><span style="font-size:12px;color:var(--muted);">${f.type}</span></td>
+    <td>${phaseLabel(f.phase)}</td>
+    <td class="${f.y1 >= 0 ? 'pos' : 'neg'}">${f.y1 >= 0 ? '+' : ''}${f.y1}%</td>
+    <td class="${f.y3 >= 0 ? 'pos' : 'neg'}">${f.y3 >= 0 ? '+' : ''}${f.y3}%</td>
+    <td>${f.div > 0 ? f.div.toFixed(2)+'%' : '<span class="zero">—</span>'}</td>
+    <td>${f.exp === 0 ? '<span style="color:#059669;font-weight:700;">FREE</span>' : f.exp.toFixed(2)+'%'}</td>
+    <td><span class="rb ${riskClass(f.risk)}">${f.risk}</span></td>
+  </tr>`).join('');
+  document.getElementById('fund-count').textContent = `Showing ${data.length} of ${FUNDS.length} funds`;
+}
+
+function filterFunds() {
+  const search = document.getElementById('fund-search').value.toLowerCase();
+  const type   = document.getElementById('fund-type').value;
+  const phase  = document.getElementById('fund-phase').value;
+  const risk   = document.getElementById('fund-risk').value;
+  const filtered = FUNDS.filter(f =>
+    (!search || f.t.toLowerCase().includes(search) || f.n.toLowerCase().includes(search)) &&
+    (!type  || f.type  === type) &&
+    (!phase || f.phase === phase) &&
+    (!risk  || f.risk  === risk)
+  );
+  buildFundTable(filtered);
+}
+
+// ── SIMULATOR ────────────────────────────────────────────────────
+let simChart = null;
+let simPeriod = 6;
+
+function setPeriod(mo, el) {
+  simPeriod = mo;
+  document.querySelectorAll('.ptabsim').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  runSim();
+}
+
+function calcGrowth(p, monthly, annualPct, months) {
+  const r = annualPct / 100 / 12;
+  const vals = [];
+  let v = p;
+  for (let m = 0; m <= months; m++) {
+    vals.push(Math.round(v));
+    v = v * (1 + r) + monthly;
+  }
+  return vals;
+}
+
+function fmt$(n) {
+  if (n >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
+  if (n >= 1000)    return '$' + (n/1000).toFixed(1) + 'K';
+  return '$' + n.toLocaleString();
+}
+
+function runSim() {
+  const p       = parseFloat(document.getElementById('sim-principal').value) || 0;
+  const monthly = parseFloat(document.getElementById('sim-monthly').value)   || 0;
+  const sid     = parseInt(document.getElementById('sim-strategy').value)    || 3;
+  const s       = STRATS[sid];
+  const months  = simPeriod;
+
+  const labels = [];
+  for (let i = 0; i <= months; i++) labels.push(i === 0 ? 'Start' : `Mo ${i}`);
+
+  const bullVals = calcGrowth(p, monthly, s.bull, months);
+  const baseVals = calcGrowth(p, monthly, s.base, months);
+  const bearVals = calcGrowth(p, monthly, s.bear, months);
+
+  // Chart
+  const ctx = document.getElementById('simChart').getContext('2d');
+  if (simChart) simChart.destroy();
+  simChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: `Bull (${s.bull}%/yr)`, data: bullVals, borderColor:'#4ade80', backgroundColor:'rgba(74,222,128,.08)', borderWidth:2.5, pointRadius:3, tension:.4, fill:false },
+        { label: `Base (${s.base}%/yr)`, data: baseVals, borderColor:'#60a5fa', backgroundColor:'rgba(96,165,250,.08)', borderWidth:2.5, pointRadius:3, tension:.4, fill:false },
+        { label: `Bear (${s.bear}%/yr)`, data: bearVals, borderColor:'#f87171', backgroundColor:'rgba(248,113,113,.08)', borderWidth:2, pointRadius:3, tension:.4, fill:false },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:true,
+      plugins: {
+        legend: { labels: { color:'rgba(255,255,255,.75)', font:{ size:12 } } },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString()}`
+          }
+        }
+      },
+      scales: {
+        x: { ticks:{ color:'rgba(255,255,255,.5)', font:{size:11} }, grid:{ color:'rgba(255,255,255,.05)' } },
+        y: { ticks:{ color:'rgba(255,255,255,.5)', font:{size:11}, callback: v => '$' + (v>=1000 ? (v/1000).toFixed(0)+'K' : v) }, grid:{ color:'rgba(255,255,255,.08)' } }
+      }
+    }
+  });
+
+  // Summary cards
+  const totalIn = p + monthly * months;
+  function summarize(vals, elV, elG) {
+    const final = vals[vals.length-1];
+    const gain  = final - totalIn;
+    const pct   = totalIn > 0 ? ((final - totalIn) / totalIn * 100).toFixed(1) : '0.0';
+    document.getElementById(elV).textContent = fmt$(final);
+    document.getElementById(elG).textContent = (gain >= 0 ? '+' : '') + fmt$(gain) + ` (${gain >= 0 ? '+' : ''}${pct}%)`;
+  }
+  summarize(bullVals, 'sum-bull', 'sum-bull-g');
+  summarize(baseVals, 'sum-base', 'sum-base-g');
+  summarize(bearVals, 'sum-bear', 'sum-bear-g');
+
+  // Breakdown table
+  const steps = months <= 6 ? 1 : months <= 12 ? 2 : 3;
+  let rows = '';
+  for (let m = 0; m <= months; m += steps) {
+    if (m > months) break;
+    const invested = p + monthly * m;
+    rows += `<tr>
+      <td>${m === 0 ? 'Start' : 'Month ' + m}</td>
+      <td>$${invested.toLocaleString()}</td>
+      <td style="color:#4ade80;font-weight:600;">$${bullVals[m].toLocaleString()}</td>
+      <td style="color:#60a5fa;font-weight:600;">$${baseVals[m].toLocaleString()}</td>
+      <td style="color:#f87171;font-weight:600;">$${bearVals[m].toLocaleString()}</td>
+    </tr>`;
+  }
+  if ((months % steps) !== 0) {
+    const m = months;
+    const invested = p + monthly * m;
+    rows += `<tr>
+      <td><strong>Final</strong></td>
+      <td><strong>$${invested.toLocaleString()}</strong></td>
+      <td style="color:#4ade80;font-weight:700;">$${bullVals[m].toLocaleString()}</td>
+      <td style="color:#60a5fa;font-weight:700;">$${baseVals[m].toLocaleString()}</td>
+      <td style="color:#f87171;font-weight:700;">$${bearVals[m].toLocaleString()}</td>
+    </tr>`;
+  }
+  document.getElementById('sim-tbody').innerHTML = rows;
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+buildStratCards();
+buildFundTable(FUNDS);
+runSim();
+</script>
+</body>
+</html>
