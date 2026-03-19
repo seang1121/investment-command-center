@@ -1,83 +1,110 @@
-# 📊 Portfolio Analyzer
+# Investment Command Center
 
-![GitHub tag](https://img.shields.io/github/v/tag/seang1121/investment-command-center)
+Full-stack investment intelligence platform with professional-grade financial models and AI-powered analysis.
+
+![Status](https://img.shields.io/badge/status-active-green)
+![Python](https://img.shields.io/badge/python-3.11+-blue)
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
 ![License](https://img.shields.io/github/license/seang1121/investment-command-center)
 
-**Comprehensive investment portfolio analyzer** — compare 6 distinct strategies across Fidelity mutual funds, ETFs, and best-in-class investments.
+## What It Does
 
-## Quick Start
-
-```bash
-python portfolio_analyzer.py
-```
-
-Generates a full report with:
-- **30+ investment options** — Fidelity funds + ETFs
-- **6 complete strategies** — Conservative → Moonshot
-- **Detailed allocations** — fund mix, 1-year projections, risk profiles
-- **Implementation guides** — dollar-cost averaging, rebalancing, monitoring
-
-## 6 Strategies
-
-| Strategy | Expected Return | Max Drawdown | Best For |
-|----------|-----------------|--------------|----------|
-| 🛡️ Conservative | 5-7% | -15% | Risk-averse, income |
-| 🎯 Moderate | 8-12% | -25% | Balanced growth |
-| 📈 Growth | 12-18% | -35% | Medium risk tolerance |
-| 🚀 Aggressive | 25-40% | -50% | High growth, young |
-| 💥 Moonshot | 60-150%+ | -70%+ | YOLO, extreme risk |
-| 🌍 Global Diversified | 10-16% | -30% | International exposure |
-
-## Available Investments
-
-### Fidelity Mutual Funds
-- **Large-Cap Growth:** FFVTX, FLPSX
-- **Sector Focused:** FBIOX, FSHBX, FSPHX
-- **Balanced & Income:** FXAIX, FSKAX, FAGIX
-- **International:** FEMKX, FIEUX
-- **Bonds:** FBNDX, FTABX
-
-### ETFs
-- **Broad Market:** VTI, ITOT
-- **Tech & Growth:** QQQ, SMH, XLK
-- **Specialty:** ARKK, ICLN, IBB, IBIT
-- **Bonds:** BND, AGG
-- **Dividend:** SCHD, VYM
-- **International:** VXUS, IEMG
+Investment Command Center is a full-stack financial analysis platform combining a FastAPI backend with a Next.js frontend. It provides 12 AI agents and analyzers including Monte Carlo simulation (10k paths), Markowitz portfolio optimization, Gordon Growth valuation, risk analysis, and 5 stock/fund scanners -- all backed by real-time market data.
 
 ## Features
 
-✅ **Dollar-cost averaging** — spread investments over 3-4 months
-✅ **Rebalancing guides** — quarterly targets
-✅ **Tax efficiency tips** — mutual funds vs ETFs
-✅ **Risk monitoring** — by strategy type
-✅ **1-year projections** — based on historical data
+- **Monte Carlo Simulation** -- 10,000-path probabilistic forecasting
+- **Markowitz Portfolio Optimizer** -- efficient frontier via PyPortfolioOpt
+- **Gordon Growth Model** -- dividend discount valuation and sustainability scoring
+- **Risk Analyzer** -- Sharpe, Sortino, VaR, max drawdown
+- **5 Stock Scanners** -- dividend, tech, custom screener, and more
+- **Financial Health Scoring** -- comprehensive fund and portfolio evaluation
+- **Proactive Advisor** -- AI-driven portfolio recommendations
+- **Two-Tier Caching** -- in-memory + SQLite with configurable TTLs
+- **Portfolio Upload** -- CSV/Excel import with full analysis
 
-## Running Locally
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | Next.js 14 (App Router), TypeScript, TailwindCSS, Plotly.js |
+| **Backend** | FastAPI, Python 3.11+ |
+| **Database** | SQLite (WAL mode) |
+| **Data** | yfinance (primary), Alpha Vantage (secondary) |
+| **Models** | PyPortfolioOpt, NumPy, SciPy, Pandas |
+
+## Quick Start
+
+### Prerequisites
+
+- Python 3.11+
+- Node.js 18+
+
+### Run Both Services
 
 ```bash
-# Install dependencies (none required — pure Python)
-python portfolio_analyzer.py
+# Clone the repo
+git clone https://github.com/seang1121/investment-command-center.git
+cd investment-command-center
 
-# Output: Full formatted report to console
+# Install backend dependencies
+pip install -r api/requirements.txt
+
+# Install frontend dependencies
+cd frontend && npm install && cd ..
+
+# Start both services
+start.bat
 ```
 
-## Auto-Generated Reports
+### Run Individually
 
-**Latest report:** [PORTFOLIO_REPORT.md](./PORTFOLIO_REPORT.md)
+```bash
+# API only (http://localhost:8000)
+python -m uvicorn api.main:app --reload --port 8000
 
-Runs weekly on Friday at 4 PM EST via GitHub Actions. Latest findings automatically committed.
+# Frontend only (http://localhost:3000)
+cd frontend && npm run dev
+```
 
-## Key Principles
+API docs available at `http://localhost:8000/docs`.
 
-1. **Emergency fund first** — 6 months expenses before investing
-2. **Dollar-cost average** — don't invest lump sum
-3. **Rebalance quarterly** — keep positions on target
-4. **Monitor by risk level:**
-   - Conservative/Moderate: Quarterly
-   - Aggressive/Moonshot: Monthly to weekly
-5. **Mix Fidelity + ETFs** — expertise + low costs
+## API Endpoints
+
+| Method | Route | Purpose |
+|--------|-------|---------|
+| GET | `/api/quote/{ticker}` | Live quote |
+| GET | `/api/history/{ticker}` | Historical prices |
+| GET | `/api/dividends/{ticker}` | Dividend info |
+| POST | `/api/risk-metrics` | Risk analysis |
+| POST | `/api/monte-carlo` | Monte Carlo simulation |
+| POST | `/api/optimize` | Efficient frontier |
+| POST | `/api/dividends/analyze` | DDM + sustainability |
+| POST | `/api/portfolio/upload` | Upload CSV/Excel |
+| GET | `/api/portfolio` | Portfolio summary |
+| GET | `/api/scanner/dividends` | Dividend stock scanner |
+| GET | `/api/scanner/tech` | Emerging tech scanner |
+| GET | `/api/screener` | Custom screener |
+
+## Project Structure
+
+```
+investment-command-center/
+├── api/                    # FastAPI backend
+│   ├── main.py             # App entry, CORS, router mounting
+│   ├── routers/            # API endpoints
+│   ├── services/           # Business logic
+│   └── models/             # Pydantic schemas, DB singleton
+├── frontend/               # Next.js 14 app
+│   └── src/
+│       ├── app/            # Pages (App Router)
+│       ├── components/     # Charts, UI, layout
+│       ├── lib/            # API client, types, utils
+│       └── hooks/          # React hooks
+├── start.bat               # Launch both services
+└── .env.example            # Config template
+```
 
 ## License
 
-Personal use only.
+See [LICENSE](./LICENSE) for details.
